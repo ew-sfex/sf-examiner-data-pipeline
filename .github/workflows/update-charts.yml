@@ -1,0 +1,58 @@
+name: SF Examiner Data Pipeline
+
+on:
+  schedule:
+    # Run daily at 3:00 AM UTC (11:00 PM PST / 10:00 PM PDT)
+    - cron: '0 3 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  update-charts:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run 911 Maps Update
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+        DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
+      run: python sf_911_maps.py
+      
+    - name: Run 911 Charts Update
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+        DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
+      run: python sf_911_pipeline.py
+      
+    - name: Run 311 Maps Update
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+        DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
+      run: python sf_311_maps.py
+      
+    - name: Run 311 Charts Update
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+        DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
+      run: python sf_311_pipeline.py
+      
+    - name: Upload logs as artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: pipeline-logs
+        path: |
+          *.log
+        retention-days: 30 

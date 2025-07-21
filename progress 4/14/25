@@ -1,0 +1,143 @@
+# DataSF to Datawrapper Pipeline - April 14, 2025 Update
+
+## 1. Recent Progress: Maps Implementation
+
+### Maps Successfully Implemented
+We've successfully implemented seven interactive maps displaying 311 service requests from the past day:
+
+1. **Street and Sidewalk Cleaning** (Chart ID: nB5JE)
+   - 796 reports on April 13, 2025
+   - Marker color: SF Examiner red (#cf4236)
+
+2. **Graffiti Reports** (Chart ID: 0xtQT)
+   - 129 reports on April 13, 2025
+   - Marker color: SF Examiner yellow (#ffd74c)
+
+3. **Encampment Reports** (Chart ID: os0dX)
+   - 104 reports on April 13, 2025
+   - Marker color: SF Examiner green (#7e883f)
+
+4. **Tree Maintenance** (Chart ID: 9JMgr)
+   - 35 reports on April 13, 2025
+   - Marker color: SF Examiner blue (#80d0d8)
+
+5. **Abandoned Vehicles** (Chart ID: V5s4q)
+   - 37 reports on April 13, 2025
+   - Marker color: SF Examiner tan (#e3cbac)
+
+6. **Sewage Backups** (Chart ID: Lu3TG)
+   - 14 reports on April 13, 2025
+   - Marker color: Purple (#a57bc1)
+   - Enhanced tooltip showing source of backups (e.g., "From side sewer vent")
+
+7. **Sidewalk and Street Defects** (Chart ID: acPZT)
+   - 44 reports on April 13, 2025
+   - Marker color: Saddle brown (#8B4513)
+   - Enhanced tooltip showing type of defect
+
+### Technical Improvements
+
+#### Data Processing
+- Implemented robust handling for missing or inconsistent columns in API responses
+- Added default values for missing fields to prevent processing errors
+- Improved service type identification with comprehensive queries
+
+#### Map Visualization
+- Created consistent tooltip formatting across all maps
+- Implemented color-coding for item status (open/closed)
+- Preserved proper capitalization for addresses and neighborhoods
+- Applied consistent map styling with SF Examiner brand colors
+- Set up tooltip customization to ensure proper display of location details
+
+#### Error Handling
+- Enhanced logging with detailed information about data retrieval and processing
+- Added specific handling for missing columns in API responses
+- Implemented better error reporting with tracebacks for debugging
+
+## 2. Current Status of Visualization Pipeline
+
+### Line Charts (Monthly Trends)
+All line charts continue to function correctly with the following IDs:
+1. Street and Sidewalk Cleaning (Chart ID: Fgte7)
+2. Graffiti Reports (Chart ID: aswDZ)
+3. Encampment Reports (Chart ID: BJfSt)
+4. Tree Maintenance (Chart ID: dQte4)
+5. Abandoned Vehicles (Chart ID: R3cXx)
+
+### Maps (Daily Reports)
+All seven maps are now operational with the following IDs:
+1. Street and Sidewalk Cleaning (Chart ID: nB5JE)
+2. Graffiti Reports (Chart ID: 0xtQT)
+3. Encampment Reports (Chart ID: os0dX)
+4. Tree Maintenance (Chart ID: 9JMgr)
+5. Abandoned Vehicles (Chart ID: V5s4q)
+6. Sewage Backups (Chart ID: Lu3TG)
+7. Sidewalk and Street Defects (Chart ID: acPZT)
+
+## 3. Technical Implementation Details
+
+### Map Query Structure
+```sql
+SELECT 
+    lat,
+    long,
+    requested_datetime,
+    address,
+    status_description,
+    neighborhoods_sffind_boundaries,
+    service_name,
+    service_subtype,
+    service_details,
+    supervisor_district,
+    police_district,
+    source
+WHERE 
+    service_name = '[SERVICE_TYPE]'
+    AND requested_datetime >= '[START_DATE]'
+    AND requested_datetime < '[END_DATE]'
+    AND lat IS NOT NULL
+    AND long IS NOT NULL
+ORDER BY 
+    requested_datetime DESC
+```
+
+### Map Tooltip Template
+```html
+<div style="font-family:Arial,sans-serif;line-height:1.3;">
+<b>[SERVICE_TYPE]</b><br>
+<b>Location:</b><br>{{ PROPER(address) }}<br>
+<b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>
+<b>Status:</b> <span style="color:{{ status == 'Closed' ? '#4a4' : '#d44' }}">{{ status }}</span><br>
+<b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)
+</div>
+```
+
+## 4. Next Steps
+
+### Short-term Tasks
+1. **Security & Code Cleanup**
+   - Remove hardcoded API credentials in sf_311_maps.py
+   - Implement environment variable approach for credentials
+   - Standardize credential handling across all scripts
+
+2. **GitHub Actions Setup**
+   - Prepare code for GitHub repository
+   - Create workflow configuration for automatic daily updates
+   - Set up repository secrets for API credentials
+
+3. **Data Validation**
+   - Add data consistency checks and notifications for unusual patterns
+   - Implement data quality scoring for reports
+
+### Medium-term Enhancements
+1. **Integration Possibilities**
+   - Explore integration with other city datasets (crime, demographics, etc.)
+   - Add neighborhood-level aggregations and statistics
+
+2. **Advanced Visualization**
+   - Consider heatmap view for high-density reporting areas
+   - Add trend indicators for neighborhoods with increasing reports
+
+3. **Reporting Features**
+   - Create automated weekly/monthly summary reports
+   - Develop anomaly detection for unusual reporting patterns 
