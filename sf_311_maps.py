@@ -198,8 +198,9 @@ def get_map_data_from_datasf(chart_config):
         
         # Use the last complete day
         end_date = latest_date.replace(hour=23, minute=59, second=59)
-        # Start date is 24 hours before end date
-        start_date = end_date - timedelta(days=1)
+        # For maps, we want data from the most recent complete day
+        # So we query for data from yesterday (start_date) to latest_date (end_date)
+        start_date = end_date.replace(hour=0, minute=0, second=0)  # Start of the last complete day
         
     except Exception as e:
         logging.error(f"Error finding latest date, falling back to default date range: {str(e)}")
@@ -669,8 +670,8 @@ def process_and_update_map(config_name, template_file=None):
         
         # Apply template settings if provided and this is not the source map
         if template_file and config["chart_id"] != "nB5JE":  # Assuming nB5JE is the source
-            # Calculate the actual query date (one day before latest_date)
-            query_date = (latest_date - timedelta(days=1)).strftime("%B %d, %Y")
+            # Use the latest_date as the query date (the most recent complete day)
+            query_date = latest_date.strftime("%B %d, %Y")
             
             # Get the specific tooltip template for this map
             tooltip_template = config.get('tooltip_template')

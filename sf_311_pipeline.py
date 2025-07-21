@@ -77,31 +77,21 @@ def get_data_from_datasf(chart_config):
         latest_date_result = client.get(chart_config['dataset_id'], query=latest_date_query)
         if latest_date_result:
             latest_date = datetime.fromisoformat(latest_date_result[0]['latest_date'].split('T')[0])
-            # Set end_date to the end of the current month
-            end_date = datetime.now().replace(day=1, hour=23, minute=59, second=59)
-            # Add one month and subtract one day to get end of current month
-            if end_date.month == 12:
-                end_date = end_date.replace(year=end_date.year + 1, month=1)
-            else:
-                end_date = end_date.replace(month=end_date.month + 1)
-            end_date = end_date - timedelta(days=1)
+            # Set end_date to the last day of the previous complete month (same logic as 911 charts)
+            end_date = latest_date.replace(day=1) - timedelta(days=1)
             logging.info(f"Latest data available through: {end_date.strftime('%Y-%m-%d')}")
         else:
             # Fallback to current date if we can't determine the latest date
-            end_date = datetime.now().replace(day=1, hour=23, minute=59, second=59)
-            if end_date.month == 12:
-                end_date = end_date.replace(year=end_date.year + 1, month=1)
-            else:
-                end_date = end_date.replace(month=end_date.month + 1)
-            end_date = end_date - timedelta(days=1)
+            end_date = datetime.now()
+            if end_date.day <= 5:  # If within first 5 days of month, use previous month as end date
+                end_date = end_date.replace(day=1) - timedelta(days=1)
+            end_date = end_date.replace(day=1) - timedelta(days=1)  # Last day of previous month
     except Exception as e:
         logging.warning(f"Could not determine latest date, using current date: {str(e)}")
-        end_date = datetime.now().replace(day=1, hour=23, minute=59, second=59)
-        if end_date.month == 12:
-            end_date = end_date.replace(year=end_date.year + 1, month=1)
-        else:
-            end_date = end_date.replace(month=end_date.month + 1)
-        end_date = end_date - timedelta(days=1)
+        end_date = datetime.now()
+        if end_date.day <= 5:
+            end_date = end_date.replace(day=1) - timedelta(days=1)
+        end_date = end_date.replace(day=1) - timedelta(days=1)
     
     # Calculate start date as January 2020
     start_date = datetime(2020, 1, 1)

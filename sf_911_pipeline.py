@@ -171,13 +171,13 @@ def update_datawrapper_chart(chart_id, data, config):
         # Additional SF Examiner colors
         sf_colors = ["#cf4236", "#ffd74c", "#7e883f", "#80d0d8", "#e3cbac", "#CCC9c8"]
         
-        # Assign colors in reverse order so most recent year is primary color
+        # Assign colors in reverse order so most recent year is red
         for i, year in enumerate(reversed(years)):
-            # Use the primary color for the most recent year, then cycle through others
+            # Use red (#cf4236) for the most recent year, then cycle through others
             if i == 0:
-                colors[year] = primary_color
+                colors[year] = "#cf4236"  # Always red for most recent year
             else:
-                colors[year] = sf_colors[min(i, len(sf_colors) - 1)]
+                colors[year] = sf_colors[min(i + 1, len(sf_colors) - 1)]
             
             line_settings[year] = {
                 "stroke": "3px",
