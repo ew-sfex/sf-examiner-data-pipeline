@@ -192,6 +192,9 @@ def update_datawrapper_chart(chart_id, data, title=None):
                 "byline": "San Francisco Examiner",
                 "title": title
             },
+            "annotate": {
+                "notes": f"Data updated on {current_date}"
+            },
             "visualize": {
                 "type": "d3-lines",
                 "interpolation": "linear",
