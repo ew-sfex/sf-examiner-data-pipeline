@@ -205,8 +205,7 @@ def update_datawrapper_chart(chart_id, data, config):
             "describe": {
                 "source-name": "DataSF - Police Department Incident Reports",
                 "source-url": "https://data.sfgov.org/Public-Safety/Police-Department-Incident-Reports-2018-to-Present/wg3w-h783",
-                "intro": f"Data updated on {current_date}",
-                "notes": f"Data updated on {current_date}",
+                "intro": "",
                 "byline": "San Francisco Examiner",
                 "title": title
             },
