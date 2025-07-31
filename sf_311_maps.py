@@ -159,15 +159,16 @@ MAP_CONFIGS = {
     "noise_complaints_map": {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "AJzUh",  # Noise complaints map
-        "service_filter": "service_name = 'Noise'",
+        "service_filter": "service_name = 'Noise' AND agency_responsible IN ('Noise Report', 'Entertainment Commission', 'DPH Environmental Health - Noise')",
         "title": "Noise Complaints",
-        "description": "Location of reported noise complaints",
+        "description": "Location of reported noise complaints and noise-related service requests",
         "marker_color": "#9932cc",  # Dark orchid purple
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>Noise Complaint</b><br>
 <b>Type:</b><br>{{ service_subtype }}<br>
 <b>Location:</b><br>{{ PROPER(address) }}<br>
 <b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>
+<b>Agency:</b><br>{{ agency_responsible }}<br>
 <b>Status:</b> <span style="color:{{ status == 'Closed' ? '#4a4' : '#d44' }}">{{ status }}</span><br>
 <b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)
 </div>"""
@@ -208,9 +209,9 @@ def get_map_data_from_datasf(chart_config):
         end_date = datetime.now().replace(hour=23, minute=59, second=59) - timedelta(days=1)
         start_date = end_date - timedelta(days=1)
     
-    # Format dates for query
+    # Format dates for query - end date should be next day for < comparison
     start_date_str = start_date.strftime('%Y-%m-%d')
-    end_date_str = end_date.strftime('%Y-%m-%d')
+    end_date_str = (end_date + timedelta(days=1)).strftime('%Y-%m-%d')
     
     logging.info(f"Querying data for {start_date_str}")
     
@@ -228,7 +229,8 @@ def get_map_data_from_datasf(chart_config):
         service_details,
         supervisor_district,
         police_district,
-        source
+        source,
+        agency_responsible
     WHERE 
         {chart_config['service_filter']}
         AND requested_datetime >= '{start_date_str}'
@@ -297,7 +299,7 @@ def get_map_data_from_datasf(chart_config):
     required_cols = [
         'lat', 'long', 'status', 'address', 'reported_datetime', 'hours_ago',
         'neighborhood', 'district', 'service_name', 'service_subtype',
-        'service_details', 'source'
+        'service_details', 'source', 'agency_responsible'
     ]
     final_df = pd.DataFrame(columns=required_cols)
     
@@ -317,7 +319,8 @@ def get_map_data_from_datasf(chart_config):
         # Add missing columns with default values if they don't exist
         required_columns = [
             'neighborhoods_sffind_boundaries', 'supervisor_district', 
-            'service_subtype', 'service_details', 'source', 'service_name'
+            'service_subtype', 'service_details', 'source', 'service_name',
+            'agency_responsible'
         ]
         
         for col in required_columns:
@@ -332,6 +335,7 @@ def get_map_data_from_datasf(chart_config):
         df['service_details'] = df['service_details'].fillna('')
         df['source'] = df['source'].fillna('N/A')
         df['service_name'] = df['service_name'].fillna('N/A')
+        df['agency_responsible'] = df['agency_responsible'].fillna('N/A')
         
         # For encampment reports specifically, use a default value if service_details is empty
         encampment_mask = (df['service_name'] == 'Encampment') | (df['service_name'] == 'Encampments')
@@ -387,7 +391,8 @@ def get_map_data_from_datasf(chart_config):
             'service_name': df['service_name'],
             'service_subtype': df['service_subtype'],
             'service_details': df['service_details'],
-            'source': df['source']
+            'source': df['source'],
+            'agency_responsible': df['agency_responsible']
         })
         
         # Ensure the DataFrame has the correct column order (optional but good practice)
@@ -421,7 +426,8 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
             'service_name': data['service_name'],
             'service_subtype': data['service_subtype'],
             'service_details': data['service_details'],
-            'source': data['source']
+            'source': data['source'],
+            'agency_responsible': data['agency_responsible']
         })
         
         # Drop any rows with invalid lat/long
