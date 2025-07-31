@@ -441,8 +441,8 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
         current_viz_settings = current_metadata.get('visualize', {})
         current_color_settings = current_viz_settings.get('color', {})
         
-        # Format date for display - Use the actual query date (one day before latest_date)
-        query_date = (latest_date - timedelta(days=1)).strftime("%B %d, %Y")
+        # Format date for display - Use the latest_date (most recent complete day)
+        query_date = latest_date.strftime("%B %d, %Y")
         
         # Start with essential metadata we always want to update
         metadata = {
