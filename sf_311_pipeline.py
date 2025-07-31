@@ -188,6 +188,7 @@ def update_datawrapper_chart(chart_id, data, title=None):
                 "source-name": "DataSF",
                 "source-url": "https://datasf.org/opendata/",
                 "intro": f"Data updated on {current_date}",
+                "notes": f"Data updated on {current_date}",
                 "byline": "San Francisco Examiner",
                 "title": title
             },
