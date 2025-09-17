@@ -48,7 +48,9 @@ def main():
         ("sf_911_maps.py", "911 Maps Update"),
         ("sf_911_pipeline.py", "911 Charts Update"), 
         ("sf_311_maps.py", "311 Maps Update"),
-        ("sf_311_pipeline.py", "311 Charts Update")
+        ("sf_311_pipeline.py", "311 Charts Update"),
+        ("sf_building_permits_maps.py", "Building Permits Maps Update"),
+        ("sf_building_permits_pipeline.py", "Building Permits Charts Update")
     ]
     
     results = {}

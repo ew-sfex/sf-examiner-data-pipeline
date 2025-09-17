@@ -443,6 +443,7 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
         
         # Format date for display - Use the latest_date (most recent complete day)
         query_date = latest_date.strftime("%B %d, %Y")
+        current_date = datetime.now().strftime("%B %d, %Y")
         
         # Start with essential metadata we always want to update
         metadata = {
@@ -453,6 +454,9 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
                 "byline": "San Francisco Examiner",
                 # Use the base title without "Past 4 Weeks" or dates
                 "title": config['title'].split(" - ")[0].strip()
+            },
+            "annotate": {
+                "notes": f"Data updated on {current_date}"
             }
         }
         

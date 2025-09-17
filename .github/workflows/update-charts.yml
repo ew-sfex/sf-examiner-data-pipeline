@@ -2,8 +2,8 @@ name: SF Examiner Data Pipeline
 
 on:
   schedule:
-    # Run daily at 3:00 AM UTC (11:00 PM PST / 10:00 PM PDT)
-    - cron: '0 3 * * *'
+    # Run daily at 12:00 PM UTC (4:00 AM PST / 4:00 AM PDT)
+    - cron: '0 12 * * *'
   workflow_dispatch: # Allow manual triggering
 
 jobs:
@@ -47,6 +47,18 @@ jobs:
         DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
         DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
       run: python sf_311_pipeline.py
+      
+    - name: Run Building Permits Maps Update
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+        DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
+      run: python sf_building_permits_maps.py
+      
+    - name: Run Building Permits Charts Update
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+        DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
+      run: python sf_building_permits_pipeline.py
       
     - name: Upload logs as artifacts
       if: always()

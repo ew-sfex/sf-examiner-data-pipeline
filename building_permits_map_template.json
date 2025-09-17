@@ -1,0 +1,197 @@
+{
+  "visualize": {
+    "dark-mode-invert": true,
+    "highlighted-series": [],
+    "highlighted-values": [],
+    "sharing": {
+      "enabled": false
+    },
+    "map": {
+      "type": "points",
+      "points": {
+        "fill": "#cf4236",
+        "size": 8,
+        "radius": 4,
+        "stroke": "#000000",
+        "opacity": 0.7,
+        "fillOpacity": 0.8,
+        "strokeWidth": 0.5,
+        "strokeOpacity": 1
+      },
+      "clustering": {
+        "radius": 50,
+        "enabled": true,
+        "maxZoom": 16
+      }
+    },
+    "zoom": {
+      "max": 18,
+      "min": 11,
+      "default": 12
+    },
+    "color": {
+      "column": "status",
+      "palette": {
+        "type": "categorical",
+        "colors": {
+          "Open": "#ff4444",
+          "other": "#888888",
+          "Closed": "#44ff44",
+          "Duplicate": "#aaaaaa",
+          "In Progress": "#ffaa44"
+        }
+      }
+    },
+    "bounds": {
+      "lat1": 37.71,
+      "lat2": 37.84,
+      "lon1": -122.51,
+      "lon2": -122.36
+    },
+    "labels": {
+      "max": 0,
+      "type": "places",
+      "places": [],
+      "enabled": false
+    },
+    "layers": {},
+    "basemap": "usa-sanfran-analysis-neighborhood",
+    "general": {
+      "height": 600,
+      "miniMap": true,
+      "zoomButtons": true,
+      "scrollWheelZoom": true
+    },
+    "legends": {
+      "size": {
+        "type": "stacked",
+        "enabled": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "position": "above",
+        "showValues": true,
+        "titleWidth": 200,
+        "labelFormat": "auto",
+        "titleEnabled": true,
+        "labelPosition": "right",
+        "titlePosition": "left",
+        "valuesSetting": "auto",
+        "divergingTitle": {
+          "negative": "",
+          "positive": ""
+        }
+      },
+      "color": {
+        "size": 170,
+        "title": "Status:",
+        "labels": "ranges",
+        "enabled": true,
+        "offsetX": 0,
+        "offsetY": 0,
+        "reverse": false,
+        "labelMax": "high",
+        "labelMin": "low",
+        "position": "above",
+        "hideItems": [],
+        "interactive": true,
+        "labelCenter": "medium",
+        "orientation": "horizontal",
+        "customLabels": [],
+        "titleEnabled": true
+      }
+    },
+    "mapView": "full",
+    "miniMap": {
+      "size": 120,
+      "type": "region",
+      "enabled": false,
+      "offsetX": 1,
+      "offsetY": 1,
+      "position": "bottom-left"
+    },
+    "tooltip": {
+      "body": "<div style=\"font-family:Arial,sans-serif;line-height:1.3;\">\n<b>Noise Complaint</b><br>\n<b>Type:</b><br>{{ service_subtype }}<br>\n<b>Location:</b><br>{{ PROPER(address) }}<br>\n<b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>\n<b>Agency:</b><br>{{ agency_responsible }}<br>\n<b>Status:</b> <span style=\"color:{{ status == 'Closed' ? '#4a4' : '#d44' }}\">{{ status }}</span><br>\n<b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)\n</div>",
+      "html": true,
+      "style": "custom",
+      "title": "{{ service_subtype }}",
+      "sticky": true,
+      "enabled": true
+    },
+    "max-size": 40,
+    "zoomable": true,
+    "map-align": "center",
+    "clustering": {
+      "size": 24,
+      "type": "noverlap",
+      "color": 0,
+      "enabled": false,
+      "gridSize": 15,
+      "showCount": true,
+      "tolerance": 0,
+      "iterations": 4,
+      "aggregation": "none",
+      "aggregationColor": "none"
+    },
+    "colorscale": {
+      "map": {
+        "Open": "#cf4236",
+        "Closed": "#ffd74c"
+      },
+      "mode": "continuous",
+      "stops": "equidistant",
+      "colors": [],
+      "palette": 0,
+      "rangeMax": "",
+      "rangeMin": "",
+      "stopCount": 5,
+      "customStops": [],
+      "rangeCenter": "",
+      "categoryOrder": [],
+      "interpolation": "equidistant",
+      "categoryLabels": {}
+    },
+    "fixed-size": 6,
+    "map-padding": 0,
+    "map-type-set": true,
+    "symbol-color": "#cf4236",
+    "symbol-shape": "circle",
+    "symbol-stroke": {
+      "mode": "fixed",
+      "color": "#000000",
+      "enabled": true,
+      "opacity": 0.4
+    },
+    "blend-multiply": false,
+    "chart-type-set": true,
+    "clusterTooltip": {
+      "body": "",
+      "title": "",
+      "sticky": true,
+      "enabled": false
+    },
+    "max-map-height": 650,
+    "min-label-zoom": 1,
+    "symbol-opacity": 0.7,
+    "zoom-button-pos": "br",
+    "arrow-angle-type": "symmetric",
+    "text-annotations": [],
+    "range-annotations": [],
+    "mapViewCropPadding": 10,
+    "arrow-opposed-angle": 20,
+    "arrow-symmetric-angle": 65,
+    "symbol-color-negative": "#E31A1C",
+    "responsive-symbol-size": false,
+    "basemapShowExtraOptions": false
+  },
+  "mapping": {
+    "color": "status",
+    "tooltip": "tooltip",
+    "latitude": "latitude",
+    "longitude": "longitude"
+  },
+  "axes": {
+    "lat": "latitude",
+    "lon": "longitude",
+    "values": "status"
+  }
+}
