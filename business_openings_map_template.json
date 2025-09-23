@@ -110,10 +110,10 @@
       "position": "bottom-left"
     },
     "tooltip": {
-      "body": "<b>Building Permit Completed</b><br>\n<b>Address:</b> {{ PROPER(address) }}<br>\n<b>Type:</b> {{ PROPER(permit_type_definition) }}<br>\n<b>Status:</b> {{ UPPER(status) }}<br>\n<b>Completed:</b> {{ completed_datetime }}<br>\n<b>Cost:</b> {{ FORMAT(estimated_cost, \"$0,0\") }}<br>\n<b>Neighborhood:</b> {{ PROPER(neighborhood) }}",
+      "body": "<b>{{ activity_type }}</b><br>\n<b>Address:</b> {{ PROPER(address) }}<br>\n<b>Type:</b> {{ PROPER(business_type) }}<br>\n<b>Started:</b> {{ opened_datetime }}<br>\n<b>Neighborhood:</b> {{ PROPER(neighborhood) }}\n</div>",
       "html": true,
       "style": "custom",
-      "title": "{{ PROPER(status) }}",
+      "title": "{{dba_name}}",
       "sticky": true,
       "enabled": true
     },
@@ -135,7 +135,9 @@
     "colorscale": {
       "map": {
         "Open": "#cf4236",
-        "Closed": "#ffd74c"
+        "Closed": "#ffd74c",
+        "New Business": "#cf4236",
+        "Business Relocation": "#ffd74c"
       },
       "mode": "continuous",
       "stops": "equidistant",
@@ -192,6 +194,6 @@
   "axes": {
     "lat": "latitude",
     "lon": "longitude",
-    "values": "status"
+    "values": "activity_type"
   }
 }

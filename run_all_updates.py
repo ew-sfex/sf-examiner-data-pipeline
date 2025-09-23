@@ -50,7 +50,9 @@ def main():
         ("sf_311_maps.py", "311 Maps Update"),
         ("sf_311_pipeline.py", "311 Charts Update"),
         ("sf_building_permits_maps.py", "Building Permits Maps Update"),
-        ("sf_building_permits_pipeline.py", "Building Permits Charts Update")
+        ("sf_building_permits_pipeline.py", "Building Permits Charts Update"),
+        ("sf_business_openings_maps.py", "Business Openings Maps Update"),
+        ("sf_business_openings_pipeline.py", "Business Openings Charts Update")
     ]
     
     results = {}

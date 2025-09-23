@@ -60,6 +60,18 @@ jobs:
         DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
       run: python sf_building_permits_pipeline.py
       
+    - name: Run Business Openings Maps Update
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+        DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
+      run: python sf_business_openings_maps.py
+      
+    - name: Run Business Openings Charts Update
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+        DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
+      run: python sf_business_openings_pipeline.py
+      
     - name: Upload logs as artifacts
       if: always()
       uses: actions/upload-artifact@v4
