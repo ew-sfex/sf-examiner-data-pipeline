@@ -50,6 +50,13 @@ def get_data_from_datasf(chart_config):
         latest_date_result = client.get(chart_config['dataset_id'], query=latest_date_query)
         if latest_date_result:
             latest_date = datetime.fromisoformat(latest_date_result[0]['latest_date'].split('T')[0])
+            
+            # Reject future dates (data errors) - use today instead
+            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            if latest_date > today:
+                logging.warning(f"Latest date {latest_date.strftime('%Y-%m-%d')} is in the future; using today instead")
+                latest_date = today
+            
             # Set end_date to the last day of the previous complete month (same logic as other charts)
             end_date = latest_date.replace(day=1) - timedelta(days=1)
             logging.info(f"Latest data available through: {end_date.strftime('%Y-%m-%d')}")

@@ -23,6 +23,31 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install pyarrow
+        
+    - name: Run RDC Metro Data Download
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+        DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
+      run: python rdc_inventory_pipeline.py
+      
+    - name: Run RDC County Data Download
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+        DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
+      run: python rdc_inventory_county_pipeline.py
+      
+    - name: Run RDC Metro Charts Update
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+        DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
+      run: python sf_rdc_inventory_charts.py
+      
+    - name: Run RDC County Charts Update
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+        DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
+      run: python sf_rdc_county_charts.py
         
     - name: Run 911 Maps Update
       env:
@@ -71,6 +96,22 @@ jobs:
         DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
         DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
       run: python sf_business_openings_pipeline.py
+      
+    - name: Download RDC Metro Inventory Data
+      run: python rdc_inventory_pipeline.py
+      
+    - name: Download RDC County Inventory Data
+      run: python rdc_inventory_county_pipeline.py
+      
+    - name: Update RDC Metro Charts
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+      run: python sf_rdc_inventory_charts.py
+      
+    - name: Update RDC County Charts
+      env:
+        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
+      run: python sf_rdc_county_charts.py
       
     - name: Upload logs as artifacts
       if: always()

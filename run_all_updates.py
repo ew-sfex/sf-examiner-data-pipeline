@@ -45,6 +45,10 @@ def main():
     logging.info("🚀 Starting SF Examiner data update pipeline")
     
     scripts = [
+        ("rdc_inventory_pipeline.py", "RDC Metro Inventory Data Download"),
+        ("rdc_inventory_county_pipeline.py", "RDC County Inventory Data Download"),
+        ("sf_rdc_inventory_charts.py", "RDC Metro Charts Update"),
+        ("sf_rdc_county_charts.py", "RDC County Charts Update"),
         ("sf_911_maps.py", "911 Maps Update"),
         ("sf_911_pipeline.py", "911 Charts Update"), 
         ("sf_311_maps.py", "311 Maps Update"),

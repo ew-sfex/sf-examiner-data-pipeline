@@ -73,6 +73,13 @@ def get_map_data_from_datasf(chart_config):
             raise ValueError("No data found in dataset")
             
         latest_date = datetime.fromisoformat(latest_result[0][date_field].split('T')[0])
+        
+        # Reject future dates (data errors) - use today instead
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        if latest_date > today:
+            logging.warning(f"Latest date {latest_date.strftime('%Y-%m-%d')} is in the future; using today instead")
+            latest_date = today
+        
         logging.info(f"Latest data available is from: {latest_date.strftime('%Y-%m-%d')}")
         
         # For business openings, we want data from the last 7 days (like 911 maps)
