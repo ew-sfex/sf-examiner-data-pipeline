@@ -34,7 +34,7 @@ CHART_CONFIGS = {
         "dataset_id": "wg3w-h783",  # Police Department Incident Reports 2018 to Present
         "chart_id": "1DNOm",  # Violent crimes trend chart
         "query": "SELECT date_extract_m(incident_date) AS month, date_extract_y(incident_date) AS year, COUNT(*) AS count WHERE incident_category IN ('Homicide', 'Robbery', 'Assault', 'Sex Offense') AND incident_date >= '{}' AND incident_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Violent Crime Incidents",
+        "title": "Violent crime incidents",
         "description": "Comparing monthly patterns across years",
         "color": "#cf4236"  # SF Examiner red
     },
@@ -42,7 +42,7 @@ CHART_CONFIGS = {
         "dataset_id": "wg3w-h783",
         "chart_id": "MRgFo",  # Property crimes trend chart
         "query": "SELECT date_extract_m(incident_date) AS month, date_extract_y(incident_date) AS year, COUNT(*) AS count WHERE incident_category IN ('Burglary', 'Larceny Theft', 'Motor Vehicle Theft', 'Arson') AND incident_date >= '{}' AND incident_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Property Crime Incidents",
+        "title": "Property crime incidents",
         "description": "Comparing monthly patterns across years",
         "color": "#ffd74c"  # SF Examiner yellow
     },
@@ -50,7 +50,7 @@ CHART_CONFIGS = {
         "dataset_id": "wg3w-h783",
         "chart_id": "ZquUz",  # Drug offenses trend chart
         "query": "SELECT date_extract_m(incident_date) AS month, date_extract_y(incident_date) AS year, COUNT(*) AS count WHERE incident_category = 'Drug Offense' AND incident_date >= '{}' AND incident_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Drug Offense Incidents",
+        "title": "Drug offense incidents",
         "description": "Comparing monthly patterns across years",
         "color": "#7e883f"  # SF Examiner green
     },
@@ -58,7 +58,7 @@ CHART_CONFIGS = {
         "dataset_id": "wg3w-h783",
         "chart_id": "Z9xal",  # Vehicle-related incidents trend chart
         "query": "SELECT date_extract_m(incident_date) AS month, date_extract_y(incident_date) AS year, COUNT(*) AS count WHERE incident_category IN ('Traffic Collision', 'Traffic Violation', 'Motor Vehicle Theft') AND incident_date >= '{}' AND incident_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Vehicle-Related Incidents",
+        "title": "Vehicle-related incidents",
         "description": "Comparing monthly patterns across years",
         "color": "#80d0d8"  # SF Examiner blue
     },
@@ -66,7 +66,7 @@ CHART_CONFIGS = {
         "dataset_id": "wg3w-h783",
         "chart_id": "DgPPX",  # Firearm-related incidents trend chart
         "query": "SELECT date_extract_m(incident_date) AS month, date_extract_y(incident_date) AS year, COUNT(*) AS count WHERE (incident_category IN ('Weapons Carrying Etc', 'Weapons Offense') OR incident_subcategory IN ('Robbery - Armed with Gun', 'Assault - Gun', 'Assault with a Gun', 'Discharge of a Firearm', 'Illegal Discharge of a Firearm')) AND incident_date >= '{}' AND incident_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Firearm-Related Incidents",
+        "title": "Firearm-related incidents",
         "description": "Comparing monthly patterns across years",
         "color": "#e3cbac"  # SF Examiner tan
     }
@@ -240,7 +240,8 @@ def update_datawrapper_chart(chart_id, data, config):
             }
         }
         
-        dw.update_chart(chart_id, metadata=metadata)
+        chart_title = title or metadata["describe"].get("title", "")
+        dw.update_chart(chart_id, title=chart_title, metadata=metadata)
         logger.info(f"Updated chart metadata for {chart_id}")
         
         # Publish chart

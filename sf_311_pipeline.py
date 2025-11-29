@@ -34,35 +34,35 @@ CHART_CONFIGS = {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "Fgte7",
         "query": "SELECT date_extract_m(requested_datetime) AS month, date_extract_y(requested_datetime) AS year, COUNT(*) AS count WHERE service_name = 'Street and Sidewalk Cleaning' AND requested_datetime >= '{}' AND requested_datetime <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Street and Sidewalk Cleaning Requests",
+        "title": "Street and sidewalk cleaning requests",
         "description": "Comparing monthly patterns across years"
     },
     "graffiti_monthly_comparison": {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "aswDZ",
         "query": "SELECT date_extract_m(requested_datetime) AS month, date_extract_y(requested_datetime) AS year, COUNT(*) AS count WHERE service_name LIKE 'Graffiti%' AND requested_datetime >= '{}' AND requested_datetime <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Graffiti Reports",
+        "title": "Graffiti reports",
         "description": "Comparing monthly patterns across years"
     },
     "encampments_monthly_comparison": {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "BJfSt",
         "query": "SELECT date_extract_m(requested_datetime) AS month, date_extract_y(requested_datetime) AS year, COUNT(*) AS count WHERE (service_name = 'Encampment' OR service_name = 'Encampments') AND requested_datetime >= '{}' AND requested_datetime <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Encampment Reports",
+        "title": "Encampment reports",
         "description": "Comparing monthly patterns across years"
     },
     "tree_maintenance_monthly_comparison": {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "dQte4",
         "query": "SELECT date_extract_m(requested_datetime) AS month, date_extract_y(requested_datetime) AS year, COUNT(*) AS count WHERE service_name = 'Tree Maintenance' AND requested_datetime >= '{}' AND requested_datetime <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Tree Maintenance Requests",
+        "title": "Tree maintenance requests",
         "description": "Comparing monthly patterns across years"
     },
     "abandoned_vehicles_monthly_comparison": {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "R3cXx",
         "query": "SELECT date_extract_m(requested_datetime) AS month, date_extract_y(requested_datetime) AS year, COUNT(*) AS count WHERE (service_subtype LIKE '%abandoned_vehicle%' OR service_name = 'Abandoned Vehicle') AND requested_datetime >= '{}' AND requested_datetime <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Abandoned Vehicle Reports",
+        "title": "Abandoned vehicle reports",
         "description": "Comparing monthly patterns across years"
     }
 }
@@ -222,7 +222,8 @@ def update_datawrapper_chart(chart_id, data, title=None):
             }
         }
         
-        dw.update_chart(chart_id, metadata=metadata)
+        chart_title = title or metadata["describe"].get("title", "")
+        dw.update_chart(chart_id, title=chart_title, metadata=metadata)
         logger.info(f"Updated chart metadata for {chart_id}")
         
         # Publish chart

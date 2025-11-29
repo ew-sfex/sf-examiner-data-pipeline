@@ -38,7 +38,7 @@ MAP_CONFIGS = {
         "chart_id": "2X0Uf",  # Building Permits Issued map
         "permit_filter": "issued_date IS NOT NULL",
         "date_field": "issued_date",
-        "title": "Building Permits Issued",
+        "title": "Building permits issued",
         "description": "Location of recently issued building permits",
         "marker_color": "#cf4236",  # SF Examiner red
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -56,7 +56,7 @@ MAP_CONFIGS = {
         "chart_id": "fra7O",  # Building Permits Completed map
         "permit_filter": "completed_date IS NOT NULL",
         "date_field": "completed_date", 
-        "title": "Building Permits Completed",
+        "title": "Building permits completed",
         "description": "Location of recently completed building permits",
         "marker_color": "#7e883f",  # SF Examiner green
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -410,8 +410,8 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
                 "color": "status"
             }
         
-        # Update the chart metadata (preserving custom settings)
-        dw.update_chart(chart_id, metadata=metadata)
+        desired_title = metadata['describe']['title']
+        dw.update_chart(chart_id, title=desired_title, metadata=metadata)
         logger.info(f"Updated map metadata for {chart_id} (preserving custom settings)")
 
         # Update the data using direct API call with proper encoding

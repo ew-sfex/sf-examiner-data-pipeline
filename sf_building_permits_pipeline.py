@@ -34,7 +34,7 @@ CHART_CONFIGS = {
         "dataset_id": "i98e-djp9",  # Building Permits dataset
         "chart_id": "qKV9i",  # Building Permits Issued chart
         "query": "SELECT date_extract_m(issued_date) AS month, date_extract_y(issued_date) AS year, COUNT(*) AS count WHERE issued_date IS NOT NULL AND issued_date >= '{}' AND issued_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Building Permits Issued",
+        "title": "Building permits issued",
         "description": "Monthly building permits issued by San Francisco",
         "color": "#cf4236"  # SF Examiner red
     },
@@ -42,7 +42,7 @@ CHART_CONFIGS = {
         "dataset_id": "i98e-djp9",  # Building Permits dataset
         "chart_id": "B6RMy",  # Building Permits Completed chart
         "query": "SELECT date_extract_m(completed_date) AS month, date_extract_y(completed_date) AS year, COUNT(*) AS count WHERE completed_date IS NOT NULL AND completed_date >= '{}' AND completed_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Building Permits Completed",
+        "title": "Building permits completed",
         "description": "Monthly building permits completed in San Francisco",
         "color": "#7e883f"  # SF Examiner green
     }
@@ -213,7 +213,8 @@ def update_datawrapper_chart(chart_id, data, config):
             }
         }
         
-        dw.update_chart(chart_id, metadata=metadata)
+        chart_title = title or metadata["describe"].get("title", "")
+        dw.update_chart(chart_id, title=chart_title, metadata=metadata)
         logger.info(f"Updated chart metadata for {chart_id}")
         
         # Publish chart

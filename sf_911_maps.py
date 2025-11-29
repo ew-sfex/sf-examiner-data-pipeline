@@ -38,7 +38,7 @@ MAP_CONFIGS = {
         "dataset_id": "wg3w-h783", # Police Department Incident Reports 2018 to Present
         "chart_id": "TX5ff",  # Violent crimes map
         "incident_filter": "incident_category IN ('Homicide', 'Robbery', 'Assault', 'Sex Offense')",
-        "title": "Violent Crime Incidents",
+        "title": "Violent crime incidents",
         "description": "Location of recent violent crime incidents",
         "marker_color": "#cf4236",  # SF Examiner red
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -54,7 +54,7 @@ MAP_CONFIGS = {
         "dataset_id": "wg3w-h783",
         "chart_id": "AbO6X",  # Property crimes map
         "incident_filter": "incident_category IN ('Burglary', 'Larceny Theft', 'Motor Vehicle Theft', 'Arson')",
-        "title": "Property Crime Incidents",
+        "title": "Property crime incidents",
         "description": "Location of recent property crime incidents",
         "marker_color": "#ffd74c",  # SF Examiner yellow
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -70,7 +70,7 @@ MAP_CONFIGS = {
         "dataset_id": "wg3w-h783",
         "chart_id": "h8x3T",  # Drug offenses map
         "incident_filter": "incident_category = 'Drug Offense'",
-        "title": "Drug Offense Incidents",
+        "title": "Drug offense incidents",
         "description": "Location of recent drug offense incidents",
         "marker_color": "#7e883f",  # SF Examiner green
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -86,7 +86,7 @@ MAP_CONFIGS = {
         "dataset_id": "wg3w-h783",
         "chart_id": "y8sSh",  # Vehicle-related incidents map
         "incident_filter": "incident_category IN ('Traffic Collision', 'Traffic Violation', 'Motor Vehicle Theft')",
-        "title": "Vehicle-Related Incidents",
+        "title": "Vehicle-related incidents",
         "description": "Location of recent traffic collisions, violations, and vehicle thefts",
         "marker_color": "#80d0d8",  # SF Examiner blue
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -102,7 +102,7 @@ MAP_CONFIGS = {
         "dataset_id": "wg3w-h783",
         "chart_id": "YiMUb",  # Firearm-related incidents map
         "incident_filter": "(incident_category IN ('Weapons Carrying Etc', 'Weapons Offense') OR incident_subcategory IN ('Robbery - Armed with Gun', 'Assault - Gun', 'Assault with a Gun', 'Discharge of a Firearm', 'Illegal Discharge of a Firearm'))",
-        "title": "Firearm-Related Incidents",
+        "title": "Firearm-related incidents",
         "description": "Location of recent incidents involving firearms",
         "marker_color": "#e3cbac",  # SF Examiner tan
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -421,8 +421,8 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
                 "color": "incident_category"
             }
         
-        # Update the chart metadata (preserving custom settings)
-        dw.update_chart(chart_id, metadata=metadata)
+        desired_title = metadata['describe']['title']
+        dw.update_chart(chart_id, title=desired_title, metadata=metadata)
         logger.info(f"Updated map metadata for {chart_id} (preserving custom settings)")
 
         # Update the data using direct API call with proper encoding

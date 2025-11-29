@@ -34,7 +34,7 @@ CHART_CONFIGS = {
         "dataset_id": "g8m3-pdis",  # Registered Business Locations dataset
         "chart_id": "jy28w",  # Business Openings chart
         "query": "SELECT date_extract_m(dba_start_date) AS month, date_extract_y(dba_start_date) AS year, COUNT(*) AS count WHERE dba_start_date IS NOT NULL AND (city = 'San Francisco' OR city = 'San Fran' OR city = 'SF' OR city = 'San Francisceo' OR city = 'San Franciscce' OR city = 'San Francicsco' OR city = 'Santo Francisco') AND dba_start_date >= '{}' AND dba_start_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
-        "title": "Business Openings",
+        "title": "Business openings",
         "description": "Monthly new business openings in San Francisco",
         "color": "#80d0d8"  # SF Examiner blue
     }
@@ -205,7 +205,8 @@ def update_datawrapper_chart(chart_id, data, config):
             }
         }
         
-        dw.update_chart(chart_id, metadata=metadata)
+        chart_title = title or metadata["describe"].get("title", "")
+        dw.update_chart(chart_id, title=chart_title, metadata=metadata)
         logger.info(f"Updated chart metadata for {chart_id}")
         
         # Publish chart

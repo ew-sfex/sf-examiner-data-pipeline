@@ -110,7 +110,7 @@
       "position": "bottom-left"
     },
     "tooltip": {
-      "body": "<b>{{ activity_type }}</b><br>\n<b>Address:</b> {{ PROPER(address) }}<br>\n<b>Type:</b> {{ PROPER(business_type) }}<br>\n<b>Started:</b> {{ opened_datetime }}<br>\n<b>Neighborhood:</b> {{ PROPER(neighborhood) }}\n</div>",
+      "body": "<div style=\"font-family:Arial,sans-serif;line-height:1.3;\">\n<b>{{ activity_type }}</b><br>\n<b>Business:</b> {{ PROPER(dba_name) }}<br>\n<b>Address:</b> {{ PROPER(address) }}<br>\n<b>Type:</b> {{ PROPER(business_type) }}<br>\n<b>Started:</b> {{ opened_datetime }}<br>\n<b>Neighborhood:</b> {{ PROPER(neighborhood) }}\n</div>",
       "html": true,
       "style": "custom",
       "title": "{{dba_name}}",

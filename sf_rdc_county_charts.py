@@ -37,14 +37,14 @@ CHART_CONFIGS = [
     {
         "chart_id": "L9p0d",
         "filename": "bay_area_county_price_per_sqft.csv",
-        "title": "Bay Area Listing Price per Square Foot (By County)",
+        "title": "Bay Area listing price per square foot (by county)",
         "intro": "Monthly median listing price per square foot, January 2019 onward.",
         "y_axis_label": "Price per Sq. Ft. (USD)",
     },
     {
         "chart_id": "NNv75",
         "filename": "bay_area_county_median_price.csv",
-        "title": "Bay Area Median Listing Price (By County)",
+        "title": "Bay Area median listing price (by county)",
         "intro": "Monthly median listing price, January 2019 onward.",
         "y_axis_label": "Median listing price (USD)",
     },

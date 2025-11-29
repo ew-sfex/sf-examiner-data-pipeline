@@ -38,7 +38,7 @@ MAP_CONFIGS = {
         "chart_id": "TWHZY",  # Business Openings map
         "business_filter": "location_start_date IS NOT NULL AND (city = 'San Francisco' OR city = 'San Fran' OR city = 'SF' OR city = 'San Francisceo' OR city = 'San Franciscce' OR city = 'San Francicsco' OR city = 'Santo Francisco')",
         "date_field": "location_start_date", 
-        "title": "Recent Business Activity",
+        "title": "Recent business activity",
         "description": "New business openings and business relocations",
         "marker_color": "#80d0d8",  # SF Examiner blue
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -375,7 +375,8 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
             }
         
         # Update the chart metadata (preserving custom settings)
-        dw.update_chart(chart_id, metadata=metadata)
+        desired_title = metadata['describe']['title']
+        dw.update_chart(chart_id, title=desired_title, metadata=metadata)
         logger.info(f"Updated map metadata for {chart_id} (preserving custom settings)")
 
         # Update the data using direct API call with proper encoding

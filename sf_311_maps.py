@@ -37,7 +37,7 @@ MAP_CONFIGS = {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "nB5JE",  # New test map
         "service_filter": "service_name = 'Street and Sidewalk Cleaning'",
-        "title": "Street and Sidewalk Cleaning Requests - Past 4 Weeks",
+        "title": "Street and sidewalk cleaning requests - past 4 weeks",
         "description": "Location of recent street cleaning requests",
         "marker_color": "#cf4236",  # SF Examiner red
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -52,7 +52,7 @@ MAP_CONFIGS = {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "0xtQT",  # Graffiti map
         "service_filter": "service_name LIKE 'Graffiti%'",
-        "title": "Graffiti Reports - Past 4 Weeks",
+        "title": "Graffiti reports - past 4 weeks",
         "description": "Location of recent graffiti reports",
         "marker_color": "#ffd74c",  # SF Examiner yellow
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -67,7 +67,7 @@ MAP_CONFIGS = {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "os0dX",
         "service_filter": "(service_name = 'Encampment' OR service_name = 'Encampments')",
-        "title": "Encampment Reports - Past 4 Weeks",
+        "title": "Encampment reports - past 4 weeks",
         "description": "Location of recent encampment reports",
         "marker_color": "#7e883f",  # SF Examiner green
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -82,7 +82,7 @@ MAP_CONFIGS = {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "9JMgr",
         "service_filter": "service_name = 'Tree Maintenance'",
-        "title": "Tree Maintenance Requests - Past 4 Weeks",
+        "title": "Tree maintenance requests - past 4 weeks",
         "description": "Location of recent tree maintenance requests",
         "marker_color": "#80d0d8",  # SF Examiner blue
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -97,7 +97,7 @@ MAP_CONFIGS = {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "V5s4q",
         "service_filter": "(service_subtype LIKE '%abandoned_vehicle%' OR service_name = 'Abandoned Vehicle')",
-        "title": "Abandoned Vehicle Reports - Past 4 Weeks",
+        "title": "Abandoned vehicle reports - past 4 weeks",
         "description": "Location of recent abandoned vehicle reports",
         "marker_color": "#e3cbac",  # SF Examiner tan
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -112,7 +112,7 @@ MAP_CONFIGS = {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "Lu3TG",  # Sewage backups map
         "service_filter": "service_name = 'Sewer' AND service_subtype = 'sewage_back-up_discharge'",
-        "title": "Sewage Backup Reports - Past 4 Weeks",
+        "title": "Sewage backup reports - past 4 weeks",
         "description": "Location of recent sewage backup reports",
         "marker_color": "#a57bc1",  # Purple for sewage issues
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -128,7 +128,7 @@ MAP_CONFIGS = {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "acPZT",  # Sidewalk and street defects map
         "service_filter": "(service_name = 'Sidewalk and Curb' OR service_name = 'Street Defect')",
-        "title": "Sidewalk and Street Defects",
+        "title": "Sidewalk and street defects",
         "description": "Location of reported sidewalk, curb, and street defects",
         "marker_color": "#8B4513",  # Saddle brown for infrastructure issues
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -145,7 +145,7 @@ MAP_CONFIGS = {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "XDoKW",  # Human waste reports map
         "service_filter": "service_name = 'Street and Sidewalk Cleaning' AND service_details = 'human_waste_or_urine'",
-        "title": "Human Waste Reports",
+        "title": "Human waste reports",
         "description": "Location of reported human waste or urine",
         "marker_color": "#8f4e35",  # Rust brown color
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -160,7 +160,7 @@ MAP_CONFIGS = {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "AJzUh",  # Noise complaints map
         "service_filter": "service_name = 'Noise' AND agency_responsible IN ('Noise Report', 'Entertainment Commission', 'DPH Environmental Health - Noise')",
-        "title": "Noise Complaints",
+        "title": "Noise complaints",
         "description": "Location of reported noise complaints and noise-related service requests",
         "marker_color": "#9932cc",  # Dark orchid purple
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
@@ -528,8 +528,8 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
                 "color": "status"
             }
         
-        # Update the chart metadata (preserving custom settings)
-        dw.update_chart(chart_id, metadata=metadata)
+        desired_title = metadata['describe']['title']
+        dw.update_chart(chart_id, title=desired_title, metadata=metadata)
         logger.info(f"Updated map metadata for {chart_id} (preserving custom settings)")
 
         # Update the data using direct API call with proper encoding

@@ -24,7 +24,7 @@ logger = logging.getLogger("rdc_charts")
 CHART_CONFIGS: Dict[str, Dict[str, str]] = {
     "median_listing_price_per_square_foot": {
         "chart_id": "ri9VR",
-        "title": "San Francisco Median Listing Price per Square Foot",
+        "title": "San Francisco median listing price per square foot",
         "subtitle": "Monthly listing price per square foot",
         "metric_column": "value",
         "value_label": "median_listing_price_per_sqft",
@@ -32,7 +32,7 @@ CHART_CONFIGS: Dict[str, Dict[str, str]] = {
     },
     "active_listing_count": {
         "chart_id": "fnk2G",
-        "title": "San Francisco Active For-Sale Listings",
+        "title": "San Francisco active for-sale listings",
         "subtitle": "Monthly active listings",
         "metric_column": "value",
         "value_label": "active_listing_count",
@@ -40,7 +40,7 @@ CHART_CONFIGS: Dict[str, Dict[str, str]] = {
     },
     "median_listing_price": {
         "chart_id": "xBni4",
-        "title": "San Francisco Median Listing Price",
+        "title": "San Francisco median listing price",
         "subtitle": "Monthly median listing price",
         "metric_column": "value",
         "value_label": "median_listing_price",
@@ -48,7 +48,7 @@ CHART_CONFIGS: Dict[str, Dict[str, str]] = {
     },
     "median_days_on_market": {
         "chart_id": "wcABj",
-        "title": "San Francisco Median Days on Market",
+        "title": "San Francisco median days on market",
         "subtitle": "Monthly median days homes spend on market",
         "metric_column": "value",
         "value_label": "median_days_on_market",

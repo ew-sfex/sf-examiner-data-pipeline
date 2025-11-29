@@ -58,19 +58,19 @@ CBSA_CODE = 41860  # San Francisco-Oakland-Berkeley, CA Metro Area
 
 METRICS = {
     "median_listing_price": {
-        "title": "Median Listing Price",
+        "title": "Median listing price",
         "description": "Median listing price for all homes",
     },
     "median_listing_price_per_square_foot": {
-        "title": "Median Listing Price per Square Foot",
+        "title": "Median listing price per square foot",
         "description": "Median listing price per square foot",
     },
     "active_listing_count": {
-        "title": "Active Listing Count",
+        "title": "Active listing count",
         "description": "Total active for-sale listings",
     },
     "median_days_on_market": {
-        "title": "Median Days on Market",
+        "title": "Median days on market",
         "description": "Median days homes spend on market",
     },
 }
