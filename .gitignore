@@ -56,3 +56,8 @@ config.local.json
 # Temporary files
 *.tmp
 *.temp 
+# RDC data files (regenerated daily)
+data_sources/rdc/raw/*.csv
+data_sources/rdc/county/raw/*.csv
+data_sources/rdc/*.parquet
+data_sources/rdc/county/*.parquet
