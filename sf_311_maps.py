@@ -214,7 +214,7 @@ MAP_CONFIGS = {
         "chart_id": "AJzUh",
         "service_filter": "service_name = 'Noise' AND agency_responsible IN ('Noise Report', 'Entertainment Commission', 'DPH Environmental Health - Noise')",
         "marker_color": "#9932cc",  # Dark orchid purple
-        "description_template": "These are the {count} noise complaints San Franciscans made to 311 on {date}.",
+        "description_template": "These are the {count} noise complaints reported to San Francisco 311 on {date}. The City allows for human- and animal-created noises unless they fall between 10 p.m. and 7 a.m. or become unreasonable. Some noise complaints are recorded only for data and not acted upon, according to San Francisco 311.",
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>{{ service_subtype }}</b><br>
 <b>Location:</b><br>{{ PROPER(address) }}<br>

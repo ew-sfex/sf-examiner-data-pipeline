@@ -52,35 +52,35 @@ CHART_CONFIGS = {
         "chart_id": "Fgte7",
         "query": "SELECT date_extract_m(requested_datetime) AS month, date_extract_y(requested_datetime) AS year, COUNT(*) AS count WHERE service_name = 'Street and Sidewalk Cleaning' AND requested_datetime >= '{}' AND requested_datetime <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Street and sidewalk cleaning requests",
-        "description": "Comparing monthly patterns across years"
+        "description_template": "These are the annual and monthly totals of street and sidewalk cleaning requests made to 311 since Jan. 1, 2020. Figures are updated daily, and new totals are visible at the conclusion of each month."
     },
     "graffiti_monthly_comparison": {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "aswDZ",
         "query": "SELECT date_extract_m(requested_datetime) AS month, date_extract_y(requested_datetime) AS year, COUNT(*) AS count WHERE service_name LIKE 'Graffiti%' AND requested_datetime >= '{}' AND requested_datetime <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Graffiti reports",
-        "description": "Comparing monthly patterns across years"
+        "description_template": "These are the annual and monthly total reports of graffiti on buildings, public property and other objects made to 311 since Jan. 1, 2020. Figures are updated daily, and new totals are visible at the conclusion of each month."
     },
     "encampments_monthly_comparison": {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "BJfSt",
         "query": "SELECT date_extract_m(requested_datetime) AS month, date_extract_y(requested_datetime) AS year, COUNT(*) AS count WHERE (service_name = 'Encampment' OR service_name = 'Encampments') AND requested_datetime >= '{}' AND requested_datetime <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Encampment reports",
-        "description": "Comparing monthly patterns across years"
+        "description_template": "These are the annual and monthly totals of homeless encampments reported to 311 since Jan. 1, 2020. Figures are updated daily, and new totals are visible at the conclusion of each month."
     },
     "tree_maintenance_monthly_comparison": {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "dQte4",
         "query": "SELECT date_extract_m(requested_datetime) AS month, date_extract_y(requested_datetime) AS year, COUNT(*) AS count WHERE service_name = 'Tree Maintenance' AND requested_datetime >= '{}' AND requested_datetime <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Tree maintenance requests",
-        "description": "Comparing monthly patterns across years"
+        "description_template": "These are the annual and monthly total reports of damaged and fallen trees made to 311 since Jan. 1, 2020. Figures are updated daily, and new totals are visible at the conclusion of each month."
     },
     "abandoned_vehicles_monthly_comparison": {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "R3cXx",
         "query": "SELECT date_extract_m(requested_datetime) AS month, date_extract_y(requested_datetime) AS year, COUNT(*) AS count WHERE (service_subtype LIKE '%abandoned_vehicle%' OR service_name = 'Abandoned Vehicle') AND requested_datetime >= '{}' AND requested_datetime <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Abandoned vehicle reports",
-        "description": "Comparing monthly patterns across years"
+        "description_template": "These are the annual and monthly total reports of abandoned vehicles made to 311 since Jan. 1, 2020. Figures are updated daily, and new totals are visible at the conclusion of each month."
     }
 }
 
@@ -165,7 +165,7 @@ def get_data_from_datasf(chart_config):
         logging.error(f"Error fetching data from DataSF: {str(e)}")
         raise
 
-def update_datawrapper_chart(chart_id, data):
+def update_datawrapper_chart(chart_id, data, config):
     """Update a Datawrapper chart with new data. Title is NOT set - manage in Datawrapper."""
     try:
         logger.info(f"Updating Datawrapper chart {chart_id}")
@@ -199,12 +199,15 @@ def update_datawrapper_chart(chart_id, data):
                 }
             }
         
+        # Use description_template if available, otherwise fall back to static description
+        description = config.get('description_template', config.get('description', ''))
+        
         current_date_ap = format_date_ap_style(datetime.now())
         metadata = {
             "describe": {
                 "source-name": "DataSF",
                 "source-url": "https://datasf.org/opendata/",
-                "intro": "",
+                "intro": description,
                 "byline": "San Francisco Examiner"
                 # NOTE: Title is NOT set here - manage titles directly in Datawrapper
             },
@@ -271,7 +274,8 @@ def process_and_update_chart(config_name):
         # Update chart (title is NOT set - manage titles directly in Datawrapper)
         update_datawrapper_chart(
             chart_id=config["chart_id"],
-            data=data
+            data=data,
+            config=config
         )
         logger.info(f"Successfully updated {config_name} chart")
     
