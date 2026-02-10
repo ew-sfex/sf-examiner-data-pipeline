@@ -23,6 +23,40 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+def format_date_ap_style(dt):
+    """
+    Format a datetime object in AP Style.
+    - Abbreviated months with periods (except March, April, May, June, July)
+    - No leading zeros on days
+    - Format: "Jan. 2, 2025" or "March 15, 2025"
+    """
+    ap_months = {
+        1: "Jan.", 2: "Feb.", 3: "March", 4: "April", 5: "May", 6: "June",
+        7: "July", 8: "Aug.", 9: "Sept.", 10: "Oct.", 11: "Nov.", 12: "Dec."
+    }
+    month = ap_months[dt.month]
+    day = dt.day
+    year = dt.year
+    return f"{month} {day}, {year}"
+
+
+def format_date_range_ap_style(start_dt, end_dt):
+    """
+    Format a date range in AP Style.
+    - If same month: "Jan. 15-21, 2025"
+    - If different months: "Jan. 28 - Feb. 3, 2025"
+    """
+    ap_months = {
+        1: "Jan.", 2: "Feb.", 3: "March", 4: "April", 5: "May", 6: "June",
+        7: "July", 8: "Aug.", 9: "Sept.", 10: "Oct.", 11: "Nov.", 12: "Dec."
+    }
+    
+    if start_dt.month == end_dt.month and start_dt.year == end_dt.year:
+        return f"{ap_months[start_dt.month]} {start_dt.day}-{end_dt.day}, {end_dt.year}"
+    else:
+        return f"{ap_months[start_dt.month]} {start_dt.day} - {ap_months[end_dt.month]} {end_dt.day}, {end_dt.year}"
+
 # API Credentials
 DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "BVIPEwcGz4XlfLDxrzzpio0Fu9OBlgTSE8pYKNWxKF8lzxz89BHMI3zT1VWQrF2Y")
 DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN", "xdboBmIBQtjISZqIRYDWjKyxY")
@@ -342,21 +376,28 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
         # Get current visualization settings
         current_viz_settings = current_metadata.get('visualize', {})
         
-        # Format date for display
-        query_date_range = f"{(latest_date - timedelta(days=7)).strftime('%B %d')} - {latest_date.strftime('%B %d, %Y')}"
-        current_date = datetime.now().strftime("%B %d, %Y")
+        # Format date for display in AP Style
+        start_date = latest_date - timedelta(days=7)
+        query_date_range_ap = format_date_range_ap_style(start_date, latest_date)
+        current_date_ap = format_date_ap_style(datetime.now())
+        
+        # Build description - placeholder for now, will be customized per map
+        description = config.get('description_template', f"Showing {{count}} incidents from {{date_range}}.").format(
+            count=f"{len(dw_data):,}",
+            date_range=query_date_range_ap
+        ) if 'description_template' in config else f"Showing {len(dw_data):,} incidents from {query_date_range_ap}."
         
         # Start with essential metadata we always want to update
+        # NOTE: Title is NOT set here - manage titles directly in Datawrapper
         metadata = {
             "describe": {
                 "source-name": "DataSF - Police Department Incident Reports",
                 "source-url": "https://data.sfgov.org/Public-Safety/Police-Department-Incident-Reports-2018-to-Present/wg3w-h783",
-                "intro": f"Showing {len(dw_data):,} incidents from {query_date_range}.",
-                "byline": "San Francisco Examiner",
-                "title": config['title']
+                "intro": description,
+                "byline": "San Francisco Examiner"
             },
             "annotate": {
-                "notes": f"Data updated on {current_date}"
+                "notes": f"Data updated on {current_date_ap}"
             }
         }
         
@@ -364,10 +405,6 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
         # But only if they exist - otherwise use our default settings
         if current_viz_settings:
             metadata["visualize"] = current_viz_settings
-            
-            # Update specific date-related text while preserving other settings
-            if "intro" in metadata["describe"]:
-                metadata["describe"]["intro"] = f"Showing {len(dw_data):,} incidents from {query_date_range}."
             
             # Ensure we're using the right mapping settings
             if "mapping" not in metadata:
@@ -421,8 +458,8 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
                 "color": "incident_category"
             }
         
-        desired_title = metadata['describe']['title']
-        dw.update_chart(chart_id, title=desired_title, metadata=metadata)
+        # Update chart (title is NOT set - manage titles directly in Datawrapper)
+        dw.update_chart(chart_id, metadata=metadata)
         logger.info(f"Updated map metadata for {chart_id} (preserving custom settings)")
 
         # Update the data using direct API call with proper encoding
@@ -483,9 +520,10 @@ def save_map_template(source_chart_id, template_file="map_template.json"):
         logger.error(f"Error saving map template: {e}")
         raise
 
-def apply_map_template(chart_id, template_file="map_template.json", title=None, intro=None, tooltip_template=None):
+def apply_map_template(chart_id, template_file="map_template.json", intro=None, tooltip_template=None):
     """
-    Apply saved template settings to another map
+    Apply saved template settings to another map.
+    NOTE: Title is NOT set here - manage titles directly in Datawrapper.
     """
     try:
         # Load template settings
@@ -508,12 +546,10 @@ def apply_map_template(chart_id, template_file="map_template.json", title=None, 
             "axes": template.get('axes', {})
         }
         
-        # Update describe section with current values
+        # Update describe section with current values (preserves existing title)
         metadata["describe"] = current_metadata.get('describe', {})
         
-        # Update specific fields if provided
-        if title:
-            metadata["describe"]["title"] = title
+        # Update intro/description if provided
         if intro:
             metadata["describe"]["intro"] = intro
         
@@ -534,7 +570,7 @@ def apply_map_template(chart_id, template_file="map_template.json", title=None, 
             
             logger.info(f"Applied custom tooltip template to chart {chart_id}")
             
-        # Apply the settings
+        # Apply the settings (title is NOT set)
         dw.update_chart(chart_id, metadata=metadata)
         logger.info(f"Applied template settings to chart {chart_id}")
         
@@ -573,8 +609,15 @@ def process_and_update_map(config_name, template_file=None):
         
         # Apply template settings if provided and this chart has a chart_id
         if template_file and config["chart_id"]:
-            # Calculate the date range for display
-            query_date_range = f"{(latest_date - timedelta(days=7)).strftime('%B %d')} - {latest_date.strftime('%B %d, %Y')}"
+            # Calculate the date range for display in AP Style
+            start_date = latest_date - timedelta(days=7)
+            query_date_range_ap = format_date_range_ap_style(start_date, latest_date)
+            
+            # Build description
+            description = config.get('description_template', f"Showing {{count}} incidents from {{date_range}}.").format(
+                count=f"{len(data):,}",
+                date_range=query_date_range_ap
+            ) if 'description_template' in config else f"Showing {len(data):,} incidents from {query_date_range_ap}."
             
             # Get the specific tooltip template for this map
             tooltip_template = config.get('tooltip_template')
@@ -582,12 +625,11 @@ def process_and_update_map(config_name, template_file=None):
             # Log the tooltip template being used
             logger.info(f"Applying tooltip template for {config_name}: {tooltip_template[:50]}...")
             
-            # Apply template with the map-specific tooltip
+            # Apply template with the map-specific tooltip (title is NOT set)
             apply_map_template(
                 chart_id=config["chart_id"],
                 template_file=template_file,
-                title=config['title'],
-                intro=f"Showing {len(data):,} incidents from {query_date_range}.",
+                intro=description,
                 tooltip_template=tooltip_template
             )
         

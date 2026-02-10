@@ -14,12 +14,29 @@ from datawrapper import Datawrapper
 BASE_DIR = Path(__file__).resolve().parent
 PROCESSED_DIR = BASE_DIR / "data_sources" / "rdc" / "processed"
 
-DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "YOUR_DATAWRAPPER_API_KEY")
+DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "BVIPEwcGz4XlfLDxrzzpio0Fu9OBlgTSE8pYKNWxKF8lzxz89BHMI3zT1VWQrF2Y")
 DW = Datawrapper(access_token=DATAWRAPPER_API_KEY)
 
 LOG_FORMAT = "%(asctime)s | %(levelname)-8s | %(message)s"
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 logger = logging.getLogger("rdc_charts")
+
+
+def format_date_ap_style(dt):
+    """
+    Format a datetime object in AP Style.
+    - Abbreviated months with periods (except March, April, May, June, July)
+    - No leading zeros on days
+    - Format: "Jan. 2, 2025" or "March 15, 2025"
+    """
+    ap_months = {
+        1: "Jan.", 2: "Feb.", 3: "March", 4: "April", 5: "May", 6: "June",
+        7: "July", 8: "Aug.", 9: "Sept.", 10: "Oct.", 11: "Nov.", 12: "Dec."
+    }
+    month = ap_months[dt.month]
+    day = dt.day
+    year = dt.year
+    return f"{month} {day}, {year}"
 
 CHART_CONFIGS: Dict[str, Dict[str, str]] = {
     "median_listing_price_per_square_foot": {
@@ -117,16 +134,16 @@ def update_chart(chart_id: str, data: pd.DataFrame, title: str, subtitle: str, l
     years = [col for col in data.columns if col != "month"]
     colors, line_settings = build_line_settings(years)
 
+    # NOTE: Title is NOT set here - manage titles directly in Datawrapper
     metadata = {
         "describe": {
-            "title": f"{title} ({years[0]}–{years[-1]})",
             "intro": subtitle,
             "source-name": SOURCE_NAME,
             "source-url": SOURCE_URL,
             "byline": "San Francisco Examiner",
         },
         "annotate": {
-            "notes": f"Data updated on {datetime.now().strftime('%B %d, %Y')}"
+            "notes": f"Data updated on {format_date_ap_style(datetime.now())}"
         },
         "visualize": {
             "type": "d3-lines",

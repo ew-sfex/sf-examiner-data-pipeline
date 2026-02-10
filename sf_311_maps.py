@@ -23,6 +23,69 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+def format_date_ap_style(dt):
+    """
+    Format a datetime object in AP Style (date only).
+    - Abbreviated months with periods (except March, April, May, June, July)
+    - No leading zeros on days
+    - Format: "Jan. 2, 2025" or "March 15, 2025"
+    """
+    ap_months = {
+        1: "Jan.", 2: "Feb.", 3: "March", 4: "April", 5: "May", 6: "June",
+        7: "July", 8: "Aug.", 9: "Sept.", 10: "Oct.", 11: "Nov.", 12: "Dec."
+    }
+    month = ap_months[dt.month]
+    day = dt.day
+    year = dt.year
+    return f"{month} {day}, {year}"
+
+
+def format_datetime_ap_style(dt):
+    """
+    Format a datetime object in AP Style (date and time).
+    - AP Style time: lowercase a.m./p.m., no leading zeros, noon/midnight for 12:00
+    - Format: "Jan. 2, 2025, 1:38 p.m." or "March 15, 2025, noon"
+    """
+    ap_months = {
+        1: "Jan.", 2: "Feb.", 3: "March", 4: "April", 5: "May", 6: "June",
+        7: "July", 8: "Aug.", 9: "Sept.", 10: "Oct.", 11: "Nov.", 12: "Dec."
+    }
+    
+    # Date part
+    month = ap_months[dt.month]
+    day = dt.day
+    year = dt.year
+    
+    # Time part - AP Style
+    hour = dt.hour
+    minute = dt.minute
+    
+    if hour == 0 and minute == 0:
+        time_str = "midnight"
+    elif hour == 12 and minute == 0:
+        time_str = "noon"
+    else:
+        if hour == 0:
+            hour_12 = 12
+            ampm = "a.m."
+        elif hour < 12:
+            hour_12 = hour
+            ampm = "a.m."
+        elif hour == 12:
+            hour_12 = 12
+            ampm = "p.m."
+        else:
+            hour_12 = hour - 12
+            ampm = "p.m."
+        
+        if minute == 0:
+            time_str = f"{hour_12} {ampm}"
+        else:
+            time_str = f"{hour_12}:{minute:02d} {ampm}"
+    
+    return f"{month} {day}, {year}, {time_str}"
+
 # API Credentials
 DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "BVIPEwcGz4XlfLDxrzzpio0Fu9OBlgTSE8pYKNWxKF8lzxz89BHMI3zT1VWQrF2Y")
 DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN", "xdboBmIBQtjISZqIRYDWjKyxY")
@@ -32,145 +95,132 @@ dw = datawrapper.Datawrapper(access_token=DATAWRAPPER_API_KEY)
 client = Socrata("data.sfgov.org", DATASF_APP_TOKEN)
 
 # Configuration for 311 maps
+# NOTE: Titles are NOT set by code - edit them directly in Datawrapper
 MAP_CONFIGS = {
     "street_cleaning_map": {
         "dataset_id": "vw6y-z8j6",
-        "chart_id": "nB5JE",  # New test map
+        "chart_id": "nB5JE",
         "service_filter": "service_name = 'Street and Sidewalk Cleaning'",
-        "title": "Street and sidewalk cleaning requests - past 4 weeks",
-        "description": "Location of recent street cleaning requests",
         "marker_color": "#cf4236",  # SF Examiner red
+        "description_template": "These are the {count} requests San Franciscans made for street and sidewalk cleaning to 311 on {date}. The City estimates that responses can take between 2 hours and 21 days, depending on the type of trash.",
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
-<b>Street and Sidewalk Cleaning</b><br>
+<b>{{ service_details }}</b><br>
 <b>Location:</b><br>{{ PROPER(address) }}<br>
 <b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>
 <b>Status:</b> <span style="color:{{ status == 'Closed' ? '#4a4' : '#d44' }}">{{ status }}</span><br>
-<b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)
+<b>Reported:</b> {{ reported_datetime }}
 </div>"""
     },
     "graffiti_map": {
         "dataset_id": "vw6y-z8j6",
-        "chart_id": "0xtQT",  # Graffiti map
+        "chart_id": "0xtQT",
         "service_filter": "service_name LIKE 'Graffiti%'",
-        "title": "Graffiti reports - past 4 weeks",
-        "description": "Location of recent graffiti reports",
         "marker_color": "#ffd74c",  # SF Examiner yellow
+        "description_template": "These are the {count} instances of graffiti in San Francisco requested for removal by 311 on {date}. The City estimates that most graffiti takes between two and three days to remove, while its presence on parking or traffic signs can take as many as 20 days.",
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
-<b>Graffiti Report</b><br>
+<b>{{ service_details }}</b><br>
 <b>Location:</b><br>{{ PROPER(address) }}<br>
 <b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>
 <b>Status:</b> <span style="color:{{ status == 'Closed' ? '#4a4' : '#d44' }}">{{ status }}</span><br>
-<b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)
+<b>Reported:</b> {{ reported_datetime }}
 </div>"""
     },
     "encampments_map": {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "os0dX",
         "service_filter": "(service_name = 'Encampment' OR service_name = 'Encampments')",
-        "title": "Encampment reports - past 4 weeks",
-        "description": "Location of recent encampment reports",
         "marker_color": "#7e883f",  # SF Examiner green
+        "description_template": "These are the {count} homeless encampments reported to San Francisco 311 on {date}.",
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>Encampment Report</b><br>
 <b>Location:</b><br>{{ PROPER(address) }}<br>
 <b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>
 <b>Status:</b> <span style="color:{{ status == 'Closed' ? '#4a4' : '#d44' }}">{{ status }}</span><br>
-<b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)
+<b>Reported:</b> {{ reported_datetime }}
 </div>"""
     },
     "tree_maintenance_map": {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "9JMgr",
         "service_filter": "service_name = 'Tree Maintenance'",
-        "title": "Tree maintenance requests - past 4 weeks",
-        "description": "Location of recent tree maintenance requests",
         "marker_color": "#80d0d8",  # SF Examiner blue
+        "description_template": "These are the {count} reports of fallen or damaged trees made to San Francisco 311 on {date}. The City says responses can take up to 90 days, depending upon the issue.",
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
-<b>Tree Maintenance</b><br>
+<b>{{ service_subtype }}</b><br>
 <b>Location:</b><br>{{ PROPER(address) }}<br>
 <b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>
 <b>Status:</b> <span style="color:{{ status == 'Closed' ? '#4a4' : '#d44' }}">{{ status }}</span><br>
-<b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)
+<b>Reported:</b> {{ reported_datetime }}
 </div>"""
     },
     "abandoned_vehicles_map": {
         "dataset_id": "vw6y-z8j6",
         "chart_id": "V5s4q",
         "service_filter": "(service_subtype LIKE '%abandoned_vehicle%' OR service_name = 'Abandoned Vehicle')",
-        "title": "Abandoned vehicle reports - past 4 weeks",
-        "description": "Location of recent abandoned vehicle reports",
         "marker_color": "#e3cbac",  # SF Examiner tan
+        "description_template": "These are the {count} reports to 311 of abandoned vehicles parked for more than 72 hours in a single spot on {date}. The City says responses can take between two and five business days.",
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>Abandoned Vehicle</b><br>
 <b>Location:</b><br>{{ PROPER(address) }}<br>
 <b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>
 <b>Status:</b> <span style="color:{{ status == 'Closed' ? '#4a4' : '#d44' }}">{{ status }}</span><br>
-<b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)
+<b>Reported:</b> {{ reported_datetime }}
 </div>"""
     },
     "sewage_backups_map": {
         "dataset_id": "vw6y-z8j6",
-        "chart_id": "Lu3TG",  # Sewage backups map
+        "chart_id": "Lu3TG",
         "service_filter": "service_name = 'Sewer' AND service_subtype = 'sewage_back-up_discharge'",
-        "title": "Sewage backup reports - past 4 weeks",
-        "description": "Location of recent sewage backup reports",
         "marker_color": "#a57bc1",  # Purple for sewage issues
+        "description_template": "These are the {count} reports of sewage backup filed with San Francisco 311 on {date}. The City estimates it can respond to most reports within one business day.",
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>Sewage Backup</b><br>
-<b>Type:</b><br>{{ service_details }}<br>
 <b>Location:</b><br>{{ PROPER(address) }}<br>
 <b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>
 <b>Status:</b> <span style="color:{{ status == 'Closed' ? '#4a4' : '#d44' }}">{{ status }}</span><br>
-<b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)
+<b>Reported:</b> {{ reported_datetime }}
 </div>"""
     },
     "street_sidewalk_defects_map": {
         "dataset_id": "vw6y-z8j6",
-        "chart_id": "acPZT",  # Sidewalk and street defects map
+        "chart_id": "acPZT",
         "service_filter": "(service_name = 'Sidewalk and Curb' OR service_name = 'Street Defect')",
-        "title": "Sidewalk and street defects",
-        "description": "Location of reported sidewalk, curb, and street defects",
         "marker_color": "#8B4513",  # Saddle brown for infrastructure issues
+        "description_template": "These are the {count} sidewalk and street defects — such as cracks and raising by tree roots — reported to San Francisco 311 on {date}. The City estimates inspections are conducted within three business days.",
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
-<b>Infrastructure Defect</b><br>
-<b>Type:</b><br>{{ service_name }} - {{ service_subtype }}<br>
-<b>Details:</b><br>{{ service_details }}<br>
+<b>{{ service_subtype }}</b><br>
 <b>Location:</b><br>{{ PROPER(address) }}<br>
 <b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>
 <b>Status:</b> <span style="color:{{ status == 'Closed' ? '#4a4' : '#d44' }}">{{ status }}</span><br>
-<b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)
+<b>Reported:</b> {{ reported_datetime }}
 </div>"""
     },
     "human_waste_map": {
         "dataset_id": "vw6y-z8j6",
-        "chart_id": "XDoKW",  # Human waste reports map
+        "chart_id": "XDoKW",
         "service_filter": "service_name = 'Street and Sidewalk Cleaning' AND service_details = 'human_waste_or_urine'",
-        "title": "Human waste reports",
-        "description": "Location of reported human waste or urine",
         "marker_color": "#8f4e35",  # Rust brown color
+        "description_template": "These are the {count} human waste reports San Franciscans made to 311 on {date}.",
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>Human Waste Report</b><br>
 <b>Location:</b><br>{{ PROPER(address) }}<br>
 <b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>
 <b>Status:</b> <span style="color:{{ status == 'Closed' ? '#4a4' : '#d44' }}">{{ status }}</span><br>
-<b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)
+<b>Reported:</b> {{ reported_datetime }}
 </div>"""
     },
     "noise_complaints_map": {
         "dataset_id": "vw6y-z8j6",
-        "chart_id": "AJzUh",  # Noise complaints map
+        "chart_id": "AJzUh",
         "service_filter": "service_name = 'Noise' AND agency_responsible IN ('Noise Report', 'Entertainment Commission', 'DPH Environmental Health - Noise')",
-        "title": "Noise complaints",
-        "description": "Location of reported noise complaints and noise-related service requests",
         "marker_color": "#9932cc",  # Dark orchid purple
+        "description_template": "These are the {count} noise complaints San Franciscans made to 311 on {date}.",
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
-<b>Noise Complaint</b><br>
-<b>Type:</b><br>{{ service_subtype }}<br>
+<b>{{ service_subtype }}</b><br>
 <b>Location:</b><br>{{ PROPER(address) }}<br>
 <b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>
-<b>Agency:</b><br>{{ agency_responsible }}<br>
 <b>Status:</b> <span style="color:{{ status == 'Closed' ? '#4a4' : '#d44' }}">{{ status }}</span><br>
-<b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)
+<b>Reported:</b> {{ reported_datetime }}
 </div>"""
     }
 }
@@ -307,9 +357,10 @@ def get_map_data_from_datasf(chart_config):
         # Convert datetime
         df['requested_datetime'] = pd.to_datetime(df['requested_datetime'])
         
-        # Prepare columns for the final dataset
-        df['reported_datetime'] = df['requested_datetime'].dt.strftime('%B %d, %Y %I:%M %p')
+        # Prepare columns for the final dataset - use AP Style datetime
+        df['reported_datetime'] = df['requested_datetime'].apply(format_datetime_ap_style)
         end_date_ts = pd.Timestamp(end_date)
+        # Keep hours_ago for data but don't display in tooltip
         df['hours_ago'] = ((end_date_ts - df['requested_datetime']).dt.total_seconds() / 3600).round(1)
         
         # Handle potential missing columns and values
@@ -441,22 +492,25 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
         current_viz_settings = current_metadata.get('visualize', {})
         current_color_settings = current_viz_settings.get('color', {})
         
-        # Format date for display - Use the latest_date (most recent complete day)
-        query_date = latest_date.strftime("%B %d, %Y")
-        current_date = datetime.now().strftime("%B %d, %Y")
+        # Format date for display in AP Style - Use the latest_date (most recent complete day)
+        query_date_ap = format_date_ap_style(latest_date)
+        current_date_ap = format_date_ap_style(datetime.now())
+        
+        # Build description from template
+        description_template = config.get('description_template', "Showing {count} reports from {date}.")
+        description = description_template.format(count=f"{len(dw_data):,}", date=query_date_ap)
         
         # Start with essential metadata we always want to update
+        # NOTE: We do NOT set the title here - titles are managed directly in Datawrapper
         metadata = {
             "describe": {
                 "source-name": "DataSF",
                 "source-url": "https://datasf.org/opendata/",
-                "intro": f"Showing {len(dw_data):,} reports from {query_date}.",
-                "byline": "San Francisco Examiner",
-                # Use the base title without "Past 4 Weeks" or dates
-                "title": config['title'].split(" - ")[0].strip()
+                "intro": description,
+                "byline": "San Francisco Examiner"
             },
             "annotate": {
-                "notes": f"Data updated on {current_date}"
+                "notes": f"Data updated on {current_date_ap}"
             }
         }
         
@@ -464,10 +518,6 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
         # But only if they exist - otherwise use our default settings
         if current_viz_settings:
             metadata["visualize"] = current_viz_settings
-            
-            # Update specific date-related text while preserving other settings
-            if "intro" in metadata["describe"]:
-                metadata["describe"]["intro"] = f"Showing {len(dw_data):,} reports from {query_date}."
             
             # Ensure we're using the right mapping settings
             if "mapping" not in metadata:
@@ -528,9 +578,24 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
                 "color": "status"
             }
         
-        desired_title = metadata['describe']['title']
-        dw.update_chart(chart_id, title=desired_title, metadata=metadata)
-        logger.info(f"Updated map metadata for {chart_id} (preserving custom settings)")
+        # Apply custom tooltip template from config (overrides preserved settings)
+        tooltip_template = config.get('tooltip_template')
+        if tooltip_template:
+            if "visualize" not in metadata:
+                metadata["visualize"] = {}
+            metadata["visualize"]["tooltip"] = {
+                "title": "",  # Clear the title field - we include title in body HTML
+                "body": tooltip_template,
+                "html": True,
+                "style": "custom",
+                "sticky": True,
+                "enabled": True
+            }
+            logger.info(f"Applied custom tooltip template to {chart_id}")
+        
+        # Update chart metadata (title is NOT set - manage titles directly in Datawrapper)
+        dw.update_chart(chart_id, metadata=metadata)
+        logger.info(f"Updated map metadata for {chart_id} (preserving custom settings, title unchanged)")
 
         # Update the data using direct API call with proper encoding
         api_token = DATAWRAPPER_API_KEY
@@ -590,9 +655,10 @@ def save_map_template(source_chart_id, template_file="map_template.json"):
         logger.error(f"Error saving map template: {e}")
         raise
 
-def apply_map_template(chart_id, template_file="map_template.json", title=None, intro=None, tooltip_template=None):
+def apply_map_template(chart_id, template_file="map_template.json", intro=None, tooltip_template=None):
     """
-    Apply saved template settings to another map
+    Apply saved template settings to another map.
+    NOTE: Titles are NOT set here - manage titles directly in Datawrapper.
     """
     try:
         # Load template settings
@@ -615,12 +681,10 @@ def apply_map_template(chart_id, template_file="map_template.json", title=None, 
             "axes": template.get('axes', {})
         }
         
-        # Update describe section with current values
+        # Update describe section with current values (preserves existing title)
         metadata["describe"] = current_metadata.get('describe', {})
         
-        # Update specific fields if provided
-        if title:
-            metadata["describe"]["title"] = title
+        # Update intro/description if provided
         if intro:
             metadata["describe"]["intro"] = intro
         
@@ -632,6 +696,7 @@ def apply_map_template(chart_id, template_file="map_template.json", title=None, 
             
             # Set the tooltip template with full HTML
             metadata["visualize"]["tooltip"] = {
+                "title": "",  # Clear the title field - we include title in body HTML
                 "body": tooltip_template,
                 "html": True,
                 "style": "custom",
@@ -641,7 +706,7 @@ def apply_map_template(chart_id, template_file="map_template.json", title=None, 
             
             logger.info(f"Applied custom tooltip template to chart {chart_id}")
             
-        # Apply the settings
+        # Apply the settings (title is NOT updated)
         dw.update_chart(chart_id, metadata=metadata)
         logger.info(f"Applied template settings to chart {chart_id}")
         
@@ -680,8 +745,12 @@ def process_and_update_map(config_name, template_file=None):
         
         # Apply template settings if provided and this is not the source map
         if template_file and config["chart_id"] != "nB5JE":  # Assuming nB5JE is the source
-            # Use the latest_date as the query date (the most recent complete day)
-            query_date = latest_date.strftime("%B %d, %Y")
+            # Use AP Style date formatting
+            query_date_ap = format_date_ap_style(latest_date)
+            
+            # Build description from template
+            description_template = config.get('description_template', "Showing {count} reports from {date}.")
+            description = description_template.format(count=f"{len(data):,}", date=query_date_ap)
             
             # Get the specific tooltip template for this map
             tooltip_template = config.get('tooltip_template')
@@ -689,13 +758,11 @@ def process_and_update_map(config_name, template_file=None):
             # Log the tooltip template being used
             logger.info(f"Applying tooltip template for {config_name}: {tooltip_template[:50]}...")
             
-            # Apply template with the map-specific tooltip
+            # Apply template with the map-specific tooltip (title is NOT set)
             apply_map_template(
                 chart_id=config["chart_id"],
                 template_file=template_file,
-                # Use the base title without "Past 4 Weeks" or dates
-                title=config['title'].split(" - ")[0].strip(),
-                intro=f"Showing {len(data):,} reports from {query_date}.",
+                intro=description,
                 tooltip_template=tooltip_template
             )
         

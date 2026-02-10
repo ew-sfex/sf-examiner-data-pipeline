@@ -14,12 +14,29 @@ from datawrapper import Datawrapper
 BASE_DIR = Path(__file__).resolve().parent
 PROCESSED_DIR = BASE_DIR / "data_sources" / "rdc" / "county" / "processed"
 
-DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "YOUR_DATAWRAPPER_API_KEY")
+DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "BVIPEwcGz4XlfLDxrzzpio0Fu9OBlgTSE8pYKNWxKF8lzxz89BHMI3zT1VWQrF2Y")
 DW = Datawrapper(access_token=DATAWRAPPER_API_KEY)
 
 LOG_FORMAT = "%(asctime)s | %(levelname)-8s | %(message)s"
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 logger = logging.getLogger("rdc_county_chart")
+
+
+def format_date_ap_style(dt):
+    """
+    Format a datetime object in AP Style.
+    - Abbreviated months with periods (except March, April, May, June, July)
+    - No leading zeros on days
+    - Format: "Jan. 2, 2025" or "March 15, 2025"
+    """
+    ap_months = {
+        1: "Jan.", 2: "Feb.", 3: "March", 4: "April", 5: "May", 6: "June",
+        7: "July", 8: "Aug.", 9: "Sept.", 10: "Oct.", 11: "Nov.", 12: "Dec."
+    }
+    month = ap_months[dt.month]
+    day = dt.day
+    year = dt.year
+    return f"{month} {day}, {year}"
 
 COUNTY_COLORS = {
     "Alameda County": "#cf4236",
@@ -65,17 +82,17 @@ def load_dataset(filename: str) -> pd.DataFrame:
     return df
 
 
-def build_metadata(title: str, intro: str, y_axis_label: str) -> Dict:
+def build_metadata(intro: str, y_axis_label: str) -> Dict:
+    # NOTE: Title is NOT set here - manage titles directly in Datawrapper
     return {
         "describe": {
-            "title": title,
             "intro": intro,
             "source-name": SOURCE_NAME,
             "source-url": SOURCE_URL,
             "byline": "San Francisco Examiner",
         },
         "annotate": {
-            "notes": f"Data updated on {datetime.now().strftime('%B %d, %Y')}"
+            "notes": f"Data updated on {format_date_ap_style(datetime.now())}"
         },
         "visualize": {
             "type": "d3-lines",
@@ -115,7 +132,6 @@ def main() -> None:
     for config in CHART_CONFIGS:
         df = load_dataset(config["filename"])
         metadata = build_metadata(
-            title=config["title"],
             intro=config["intro"],
             y_axis_label=config["y_axis_label"],
         )

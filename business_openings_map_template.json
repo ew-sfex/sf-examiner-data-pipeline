@@ -186,7 +186,7 @@
     "basemapShowExtraOptions": false
   },
   "mapping": {
-    "color": "status",
+    "color": "activity_type",
     "tooltip": "tooltip",
     "latitude": "latitude",
     "longitude": "longitude"

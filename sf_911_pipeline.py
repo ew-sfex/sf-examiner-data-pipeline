@@ -20,6 +20,23 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+def format_date_ap_style(dt):
+    """
+    Format a datetime object in AP Style.
+    - Abbreviated months with periods (except March, April, May, June, July)
+    - No leading zeros on days
+    - Format: "Jan. 2, 2025" or "March 15, 2025"
+    """
+    ap_months = {
+        1: "Jan.", 2: "Feb.", 3: "March", 4: "April", 5: "May", 6: "June",
+        7: "July", 8: "Aug.", 9: "Sept.", 10: "Oct.", 11: "Nov.", 12: "Dec."
+    }
+    month = ap_months[dt.month]
+    day = dt.day
+    year = dt.year
+    return f"{month} {day}, {year}"
+
 # API Credentials
 DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "BVIPEwcGz4XlfLDxrzzpio0Fu9OBlgTSE8pYKNWxKF8lzxz89BHMI3zT1VWQrF2Y")
 DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN", "xdboBmIBQtjISZqIRYDWjKyxY")
@@ -194,23 +211,17 @@ def update_datawrapper_chart(chart_id, data, config):
                 }
             }
         
-        # Calculate the date range for display
-        date_range = f"{years[0]} - {years[-1]}"
-        
-        # Create the title with date range
-        title = f"{config['title']} ({date_range})"
-        
-        current_date = datetime.now().strftime("%B %d, %Y")
+        current_date_ap = format_date_ap_style(datetime.now())
         metadata = {
             "describe": {
                 "source-name": "DataSF - Police Department Incident Reports",
                 "source-url": "https://data.sfgov.org/Public-Safety/Police-Department-Incident-Reports-2018-to-Present/wg3w-h783",
                 "intro": "",
-                "byline": "San Francisco Examiner",
-                "title": title
+                "byline": "San Francisco Examiner"
+                # NOTE: Title is NOT set here - manage titles directly in Datawrapper
             },
             "annotate": {
-                "notes": f"Data updated on {current_date}"
+                "notes": f"Data updated on {current_date_ap}"
             },
             "visualize": {
                 "type": "d3-lines",
@@ -240,8 +251,8 @@ def update_datawrapper_chart(chart_id, data, config):
             }
         }
         
-        chart_title = title or metadata["describe"].get("title", "")
-        dw.update_chart(chart_id, title=chart_title, metadata=metadata)
+        # Update chart (title is NOT set - manage titles directly in Datawrapper)
+        dw.update_chart(chart_id, metadata=metadata)
         logger.info(f"Updated chart metadata for {chart_id}")
         
         # Publish chart

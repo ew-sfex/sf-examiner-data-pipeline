@@ -110,10 +110,10 @@
       "position": "bottom-left"
     },
     "tooltip": {
-      "body": "<div style=\"font-family:Arial,sans-serif;line-height:1.3;\">\n<b>Details: </b><br>{{ service_details }}<br>\n  <b>Location:<br></b>{{ PROPER(address) }}<br>\n  <b>Neighborhood:<br></b>{{ PROPER(neighborhood) }}<br>\n  <b>Status:</b> <span style=\"color:{{ status == 'Closed' ? '#4a4' : '#d44' }}\">{{ status }}</span><br>\n  <b>Reported:</b> {{ reported_datetime }} ({{ hours_ago }} hours ago)\n</div>",
+      "body": "<div style=\"font-family:Arial,sans-serif;line-height:1.3;\">\n<b>{{ service_details }}</b><br>\n<b>Location:</b><br>{{ PROPER(address) }}<br>\n<b>Neighborhood:</b><br>{{ PROPER(neighborhood) }}<br>\n<b>Status:</b> <span style=\"color:{{ status == 'Closed' ? '#4a4' : '#d44' }}\">{{ status }}</span><br>\n<b>Reported:</b> {{ reported_datetime }}\n</div>",
       "html": true,
       "style": "custom",
-      "title": "{{ service_subtype }}",
+      "title": "",
       "sticky": true,
       "enabled": true
     },
