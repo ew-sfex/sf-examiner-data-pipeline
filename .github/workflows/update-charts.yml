@@ -97,22 +97,6 @@ jobs:
         DATASF_APP_TOKEN: ${{ secrets.DATASF_APP_TOKEN }}
       run: python sf_business_openings_pipeline.py
       
-    - name: Download RDC Metro Inventory Data
-      run: python rdc_inventory_pipeline.py
-      
-    - name: Download RDC County Inventory Data
-      run: python rdc_inventory_county_pipeline.py
-      
-    - name: Update RDC Metro Charts
-      env:
-        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
-      run: python sf_rdc_inventory_charts.py
-      
-    - name: Update RDC County Charts
-      env:
-        DATAWRAPPER_API_KEY: ${{ secrets.DATAWRAPPER_API_KEY }}
-      run: python sf_rdc_county_charts.py
-      
     - name: Upload logs as artifacts
       if: always()
       uses: actions/upload-artifact@v4
