@@ -61,3 +61,9 @@ data_sources/rdc/raw/*.csv
 data_sources/rdc/county/raw/*.csv
 data_sources/rdc/*.parquet
 data_sources/rdc/county/*.parquet
+data_sources/rdc/processed/*.csv
+data_sources/rdc/processed/*.parquet
+data_sources/rdc/county/processed/*.csv
+data_sources/rdc/county/processed/*.parquet
+data_sources/rdc/rdc_inventory_state.json
+data_sources/rdc/county/rdc_inventory_county_state.json
