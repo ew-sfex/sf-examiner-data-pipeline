@@ -67,3 +67,9 @@ data_sources/rdc/county/processed/*.csv
 data_sources/rdc/county/processed/*.parquet
 data_sources/rdc/rdc_inventory_state.json
 data_sources/rdc/county/rdc_inventory_county_state.json
+
+# Map template files (regenerated each run from the source map's settings)
+map_template.json
+911_map_template.json
+building_permits_map_template.json
+business_openings_map_template.json
