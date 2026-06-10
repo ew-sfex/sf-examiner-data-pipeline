@@ -44,11 +44,11 @@ Add these two secrets:
 
 **Secret 1:**
 - Name: `DATAWRAPPER_API_KEY`
-- Value: `BVIPEwcGz4XlfLDxrzzpio0Fu9OBlgTSE8pYKNWxKF8lzxz89BHMI3zT1VWQrF2Y`
+- Value: `<your Datawrapper API key>`
 
 **Secret 2:**
 - Name: `DATASF_APP_TOKEN`
-- Value: `xdboBmIBQtjISZqIRYDWjKyxY`
+- Value: `<your DataSF app token>`
 
 ### 4. Verify the Workflow
 

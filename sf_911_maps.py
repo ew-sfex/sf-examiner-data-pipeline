@@ -41,6 +41,52 @@ def format_date_ap_style(dt):
     return f"{month} {day}, {year}"
 
 
+def format_datetime_ap_style(dt):
+    """
+    Format a datetime object in AP Style (date and time).
+    - AP Style time: lowercase a.m./p.m., no leading zeros, noon/midnight for 12:00
+    - Format: "Jan. 2, 2025, 1:38 p.m." or "March 15, 2025, noon"
+    """
+    ap_months = {
+        1: "Jan.", 2: "Feb.", 3: "March", 4: "April", 5: "May", 6: "June",
+        7: "July", 8: "Aug.", 9: "Sept.", 10: "Oct.", 11: "Nov.", 12: "Dec."
+    }
+    
+    # Date part
+    month = ap_months[dt.month]
+    day = dt.day
+    year = dt.year
+    
+    # Time part - AP Style
+    hour = dt.hour
+    minute = dt.minute
+    
+    if hour == 0 and minute == 0:
+        time_str = "midnight"
+    elif hour == 12 and minute == 0:
+        time_str = "noon"
+    else:
+        if hour == 0:
+            hour_12 = 12
+            ampm = "a.m."
+        elif hour < 12:
+            hour_12 = hour
+            ampm = "a.m."
+        elif hour == 12:
+            hour_12 = 12
+            ampm = "p.m."
+        else:
+            hour_12 = hour - 12
+            ampm = "p.m."
+        
+        if minute == 0:
+            time_str = f"{hour_12} {ampm}"
+        else:
+            time_str = f"{hour_12}:{minute:02d} {ampm}"
+    
+    return f"{month} {day}, {year}, {time_str}"
+
+
 def format_date_range_ap_style(start_dt, end_dt):
     """
     Format a date range in AP Style.
@@ -58,8 +104,13 @@ def format_date_range_ap_style(start_dt, end_dt):
         return f"{ap_months[start_dt.month]} {start_dt.day} - {ap_months[end_dt.month]} {end_dt.day}, {end_dt.year}"
 
 # API Credentials
-DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "BVIPEwcGz4XlfLDxrzzpio0Fu9OBlgTSE8pYKNWxKF8lzxz89BHMI3zT1VWQrF2Y")
-DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN", "xdboBmIBQtjISZqIRYDWjKyxY")
+from dotenv import load_dotenv
+load_dotenv()
+
+DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY")
+DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN")
+if not DATAWRAPPER_API_KEY:
+    raise RuntimeError("DATAWRAPPER_API_KEY is not set. Add it to your environment or a .env file.")
 
 # Initialize API clients
 dw = datawrapper.Datawrapper(access_token=DATAWRAPPER_API_KEY)
@@ -73,7 +124,7 @@ MAP_CONFIGS = {
         "chart_id": "TX5ff",  # Violent crimes map
         "incident_filter": "incident_category IN ('Homicide', 'Robbery', 'Assault', 'Sex Offense')",
         "title": "Violent crime incidents",
-        "description": "Location of recent violent crime incidents",
+        "description_template": "These are the {count} total violent crime incidents reported to the San Francisco Department for the most recent seven-day period for which data is available. Reports are updated daily.",
         "marker_color": "#cf4236",  # SF Examiner red
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>Violent Crime: {{ incident_category }}</b><br>
@@ -89,7 +140,7 @@ MAP_CONFIGS = {
         "chart_id": "AbO6X",  # Property crimes map
         "incident_filter": "incident_category IN ('Burglary', 'Larceny Theft', 'Motor Vehicle Theft', 'Arson')",
         "title": "Property crime incidents",
-        "description": "Location of recent property crime incidents",
+        "description_template": "These are the {count} total property crime incidents reported to the San Francisco Police Department for the most recent seven-day period for which data is available. Reports are updated daily.",
         "marker_color": "#ffd74c",  # SF Examiner yellow
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>Property Crime: {{ incident_category }}</b><br>
@@ -105,7 +156,7 @@ MAP_CONFIGS = {
         "chart_id": "h8x3T",  # Drug offenses map
         "incident_filter": "incident_category = 'Drug Offense'",
         "title": "Drug offense incidents",
-        "description": "Location of recent drug offense incidents",
+        "description_template": "These are the {count} total drug offenses reported to the San Francisco Police Department for the most recent seven-day period for which data is available. Reports are updated daily.",
         "marker_color": "#7e883f",  # SF Examiner green
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>Drug Offense</b><br>
@@ -121,7 +172,7 @@ MAP_CONFIGS = {
         "chart_id": "y8sSh",  # Vehicle-related incidents map
         "incident_filter": "incident_category IN ('Traffic Collision', 'Traffic Violation', 'Motor Vehicle Theft')",
         "title": "Vehicle-related incidents",
-        "description": "Location of recent traffic collisions, violations, and vehicle thefts",
+        "description_template": "These are the {count} total traffic collisions, violations and vehicle thefts reported to and recorded by the San Francisco Police Department for the most recent seven-day period for which data is available. Reports are updated daily.",
         "marker_color": "#80d0d8",  # SF Examiner blue
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>Vehicle Incident: {{ incident_category }}</b><br>
@@ -137,7 +188,7 @@ MAP_CONFIGS = {
         "chart_id": "YiMUb",  # Firearm-related incidents map
         "incident_filter": "(incident_category IN ('Weapons Carrying Etc', 'Weapons Offense') OR incident_subcategory IN ('Robbery - Armed with Gun', 'Assault - Gun', 'Assault with a Gun', 'Discharge of a Firearm', 'Illegal Discharge of a Firearm'))",
         "title": "Firearm-related incidents",
-        "description": "Location of recent incidents involving firearms",
+        "description_template": "These are the {count} total incidents involving firearms reported to and recorded by the San Francisco Police Department for the most recent seven-day period for which data is available. Reports are updated daily.",
         "marker_color": "#e3cbac",  # SF Examiner tan
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>Firearm Incident: {{ incident_category }}</b><br>
@@ -295,7 +346,8 @@ def get_map_data_from_datasf(chart_config):
         df['incident_datetime'] = pd.to_datetime(df['incident_datetime'])
         
         # Prepare columns for the final dataset
-        df['formatted_datetime'] = df['incident_datetime'].dt.strftime('%B %d, %Y %I:%M %p')
+        # Use AP Style datetime format
+        df['formatted_datetime'] = df['incident_datetime'].apply(format_datetime_ap_style)
         end_date_ts = pd.Timestamp(end_date)
         df['days_ago'] = ((end_date_ts - df['incident_datetime']).dt.total_seconds() / 86400).round(1)
         
@@ -381,11 +433,12 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
         query_date_range_ap = format_date_range_ap_style(start_date, latest_date)
         current_date_ap = format_date_ap_style(datetime.now())
         
-        # Build description - placeholder for now, will be customized per map
-        description = config.get('description_template', f"Showing {{count}} incidents from {{date_range}}.").format(
+        # Build description with count placeholder
+        description_template = config.get('description_template', f"Showing {{count}} incidents from {{date_range}}.")
+        description = description_template.format(
             count=f"{len(dw_data):,}",
             date_range=query_date_range_ap
-        ) if 'description_template' in config else f"Showing {len(dw_data):,} incidents from {query_date_range_ap}."
+        ) if '{count}' in description_template or '{date_range}' in description_template else description_template
         
         # Start with essential metadata we always want to update
         # NOTE: Title is NOT set here - manage titles directly in Datawrapper
@@ -613,11 +666,12 @@ def process_and_update_map(config_name, template_file=None):
             start_date = latest_date - timedelta(days=7)
             query_date_range_ap = format_date_range_ap_style(start_date, latest_date)
             
-            # Build description
-            description = config.get('description_template', f"Showing {{count}} incidents from {{date_range}}.").format(
+            # Build description with count placeholder
+            description_template = config.get('description_template', f"Showing {{count}} incidents from {{date_range}}.")
+            description = description_template.format(
                 count=f"{len(data):,}",
                 date_range=query_date_range_ap
-            ) if 'description_template' in config else f"Showing {len(data):,} incidents from {query_date_range_ap}."
+            ) if '{count}' in description_template or '{date_range}' in description_template else description_template
             
             # Get the specific tooltip template for this map
             tooltip_template = config.get('tooltip_template')

@@ -41,6 +41,52 @@ def format_date_ap_style(dt):
     return f"{month} {day}, {year}"
 
 
+def format_datetime_ap_style(dt):
+    """
+    Format a datetime object in AP Style (date and time).
+    - AP Style time: lowercase a.m./p.m., no leading zeros, noon/midnight for 12:00
+    - Format: "Jan. 2, 2025, 1:38 p.m." or "March 15, 2025, noon"
+    """
+    ap_months = {
+        1: "Jan.", 2: "Feb.", 3: "March", 4: "April", 5: "May", 6: "June",
+        7: "July", 8: "Aug.", 9: "Sept.", 10: "Oct.", 11: "Nov.", 12: "Dec."
+    }
+    
+    # Date part
+    month = ap_months[dt.month]
+    day = dt.day
+    year = dt.year
+    
+    # Time part - AP Style
+    hour = dt.hour
+    minute = dt.minute
+    
+    if hour == 0 and minute == 0:
+        time_str = "midnight"
+    elif hour == 12 and minute == 0:
+        time_str = "noon"
+    else:
+        if hour == 0:
+            hour_12 = 12
+            ampm = "a.m."
+        elif hour < 12:
+            hour_12 = hour
+            ampm = "a.m."
+        elif hour == 12:
+            hour_12 = 12
+            ampm = "p.m."
+        else:
+            hour_12 = hour - 12
+            ampm = "p.m."
+        
+        if minute == 0:
+            time_str = f"{hour_12} {ampm}"
+        else:
+            time_str = f"{hour_12}:{minute:02d} {ampm}"
+    
+    return f"{month} {day}, {year}, {time_str}"
+
+
 def format_date_range_ap_style(start_dt, end_dt):
     """
     Format a date range in AP Style.
@@ -57,9 +103,57 @@ def format_date_range_ap_style(start_dt, end_dt):
     else:
         return f"{ap_months[start_dt.month]} {start_dt.day} - {ap_months[end_dt.month]} {end_dt.day}, {end_dt.year}"
 
+
+def fix_acronyms_and_case(text):
+    """
+    Apply proper case while preserving common acronyms.
+    Handles: OTC, DBI, SFPD, RPD, DPW, etc.
+    """
+    if pd.isna(text) or not isinstance(text, str):
+        return text
+    
+    # Common acronyms to preserve
+    acronyms = {
+        'otc': 'OTC',
+        'dbi': 'DBI', 
+        'sfpd': 'SFPD',
+        'rpd': 'RPD',
+        'dpw': 'DPW',
+        'mta': 'MTA',
+        'puc': 'PUC',
+        'dph': 'DPH',
+        'usf': 'USF',
+        'sffd': 'SFFD',
+        'adu': 'ADU',
+        'cbd': 'CBD'
+    }
+    
+    # First apply title case
+    result = text.title()
+    
+    # Then replace any acronyms with uppercase version
+    words = result.split()
+    fixed_words = []
+    for word in words:
+        # Check if the word (without punctuation) is an acronym
+        clean_word = word.strip('.,;:()[]')
+        if clean_word.lower() in acronyms:
+            # Replace with acronym, preserving any trailing punctuation
+            fixed_word = word.replace(clean_word, acronyms[clean_word.lower()])
+            fixed_words.append(fixed_word)
+        else:
+            fixed_words.append(word)
+    
+    return ' '.join(fixed_words)
+
 # API Credentials
-DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "BVIPEwcGz4XlfLDxrzzpio0Fu9OBlgTSE8pYKNWxKF8lzxz89BHMI3zT1VWQrF2Y")
-DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN", "xdboBmIBQtjISZqIRYDWjKyxY")
+from dotenv import load_dotenv
+load_dotenv()
+
+DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY")
+DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN")
+if not DATAWRAPPER_API_KEY:
+    raise RuntimeError("DATAWRAPPER_API_KEY is not set. Add it to your environment or a .env file.")
 
 # Initialize API clients
 dw = datawrapper.Datawrapper(access_token=DATAWRAPPER_API_KEY)
@@ -73,13 +167,13 @@ MAP_CONFIGS = {
         "permit_filter": "issued_date IS NOT NULL",
         "date_field": "issued_date",
         "title": "Building permits issued",
-        "description": "Location of recently issued building permits",
+        "description_template": "These are the {count} total permits issued by the Department of Building Inspection for the week ending {date}. The permit types include new construction; new wood-frame construction; additions, alterations or repairs; erecting signage; quarrying, grading, filling or excavating; demolitions; walls or painted signs; and over-the-counter alterations permits.",
         "marker_color": "#cf4236",  # SF Examiner red
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>Building Permit Issued</b><br>
 <b>Address:</b> {{ PROPER(address) }}<br>
-<b>Type:</b> {{ PROPER(permit_type_definition) }}<br>
-<b>Status:</b> {{ UPPER(status) }}<br>
+<b>Type:</b> {{ permit_type_definition }}<br>
+<b>Status:</b> {{ status }}<br>
 <b>Issued:</b> {{ issued_datetime }}<br>
 <b>Cost:</b> {{ FORMAT(estimated_cost, "$0,0") }}<br>
 <b>Neighborhood:</b> {{ PROPER(neighborhood) }}
@@ -91,13 +185,12 @@ MAP_CONFIGS = {
         "permit_filter": "completed_date IS NOT NULL",
         "date_field": "completed_date", 
         "title": "Building permits completed",
-        "description": "Location of recently completed building permits",
+        "description_template": "These are the {count} total permits the Department of Building Inspection marked as completed for the week ending {date}. The permit types include new construction; new wood-frame construction; additions, alterations or repairs; erecting signage; quarrying, grading, filling or excavating; demolitions; walls or painted signs; and over-the-counter alterations permits.",
         "marker_color": "#7e883f",  # SF Examiner green
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>Building Permit Completed</b><br>
 <b>Address:</b> {{ PROPER(address) }}<br>
-<b>Type:</b> {{ PROPER(permit_type_definition) }}<br>
-<b>Status:</b> {{ UPPER(status) }}<br>
+<b>Type:</b> {{ permit_type_definition }}<br>
 <b>Completed:</b> {{ completed_datetime }}<br>
 <b>Cost:</b> {{ FORMAT(estimated_cost, "$0,0") }}<br>
 <b>Neighborhood:</b> {{ PROPER(neighborhood) }}
@@ -129,14 +222,16 @@ def get_map_data_from_datasf(chart_config):
         logging.info(f"Latest data available is from: {latest_date.strftime('%Y-%m-%d')}")
         
         # For building permits, we want data from the last 7 days (like 911 maps)
+        # Using days=6 because query is inclusive on both ends (>= start AND <= end)
         end_date = latest_date
-        start_date = end_date - timedelta(days=7)
+        start_date = end_date - timedelta(days=6)
         
     except Exception as e:
         logging.error(f"Error finding latest date, falling back to default date range: {str(e)}")
         # Fallback: use previous 7 days from current date
+        # Using days=6 because query is inclusive on both ends (>= start AND <= end)
         end_date = datetime.now().replace(hour=23, minute=59, second=59)
-        start_date = end_date - timedelta(days=7)
+        start_date = end_date - timedelta(days=6)
     
     # Format dates for query
     start_date_str = start_date.strftime('%Y-%m-%d')
@@ -246,10 +341,12 @@ def get_map_data_from_datasf(chart_config):
         
         # Create formatted datetime fields
         if date_field == 'issued_date':
-            df['issued_datetime'] = df[date_field].dt.strftime('%B %d, %Y %I:%M %p')
+            # Use AP Style datetime format
+            df['issued_datetime'] = df[date_field].apply(format_datetime_ap_style)
             df['completed_datetime'] = 'Not completed'
         else:  # completed_date
-            df['completed_datetime'] = df[date_field].dt.strftime('%B %d, %Y %I:%M %p')
+            # Use AP Style datetime format
+            df['completed_datetime'] = df[date_field].apply(format_datetime_ap_style)
             df['issued_datetime'] = 'N/A'
         
         # Handle potential missing columns and values
@@ -273,6 +370,10 @@ def get_map_data_from_datasf(chart_config):
         df['permit_type_definition'] = df['permit_type_definition'].fillna('Unknown')
         df['estimated_cost'] = df['estimated_cost'].fillna('0')
         df['status'] = df['status'].fillna('Unknown')
+        
+        # Apply proper case with acronym preservation to status and permit type
+        df['status'] = df['status'].apply(fix_acronyms_and_case)
+        df['permit_type_definition'] = df['permit_type_definition'].apply(fix_acronyms_and_case)
         df['description'] = df['description'].fillna('No description available')
         
         # Format estimated cost as currency
@@ -360,15 +461,19 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
         current_viz_settings = current_metadata.get('visualize', {})
         
         # Format date for display in AP Style (7-day range)
-        start_date = latest_date - timedelta(days=7)
+        # Using days=6 because we want 7 inclusive days
+        start_date = latest_date - timedelta(days=6)
         query_date_range_ap = format_date_range_ap_style(start_date, latest_date)
         current_date_ap = format_date_ap_style(datetime.now())
         
-        # Build description
-        description = config.get('description_template', f"Showing {{count}} permits from {{date_range}}.").format(
+        # Build description with count and date placeholders
+        end_date_ap = format_date_ap_style(latest_date)
+        description_template = config.get('description_template', f"Showing {{count}} permits from {{date_range}}.")
+        description = description_template.format(
             count=f"{len(dw_data):,}",
-            date_range=query_date_range_ap
-        ) if 'description_template' in config else f"Showing {len(dw_data):,} permits from {query_date_range_ap}."
+            date_range=query_date_range_ap,
+            date=end_date_ap
+        ) if '{count}' in description_template or '{date_range}' in description_template or '{date}' in description_template else description_template
         
         # Start with essential metadata we always want to update
         # NOTE: Title is NOT set here - manage titles directly in Datawrapper
@@ -388,6 +493,12 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
         # But only if they exist - otherwise use our default settings
         if current_viz_settings:
             metadata["visualize"] = current_viz_settings
+            
+            # For completed map, hide the legend since all permits have same status
+            if chart_id == "fra7O":  # Completed map
+                if "legends" not in metadata["visualize"]:
+                    metadata["visualize"]["legends"] = {}
+                metadata["visualize"]["legends"]["color"] = {"enabled": False}
             
             # Ensure we're using the right mapping settings
             if "mapping" not in metadata:
@@ -446,6 +557,21 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
                 "longitude": "longitude",
                 "color": "status"
             }
+        
+        # Apply custom tooltip template from config (overrides preserved settings)
+        tooltip_template = config.get('tooltip_template')
+        if tooltip_template:
+            if "visualize" not in metadata:
+                metadata["visualize"] = {}
+            metadata["visualize"]["tooltip"] = {
+                "title": "",  # Clear the title field
+                "body": tooltip_template,
+                "html": True,
+                "style": "custom",
+                "sticky": True,
+                "enabled": True
+            }
+            logger.info(f"Applied custom tooltip template to {chart_id}")
         
         # Update chart (title is NOT set - manage titles directly in Datawrapper)
         dw.update_chart(chart_id, metadata=metadata)
@@ -599,14 +725,18 @@ def process_and_update_map(config_name, template_file=None):
         # Apply template settings if provided and this is not the source map
         if template_file and config["chart_id"] != "2X0Uf":  # 2X0Uf is the source map
             # Use AP Style date range for display
-            start_date = latest_date - timedelta(days=7)
+            # Using days=6 because we want 7 inclusive days
+            start_date = latest_date - timedelta(days=6)
             query_date_range_ap = format_date_range_ap_style(start_date, latest_date)
             
-            # Build description
-            description = config.get('description_template', f"Showing {{count}} permits from {{date_range}}.").format(
+            # Build description with count and date placeholders
+            end_date_ap = format_date_ap_style(latest_date)
+            description_template = config.get('description_template', f"Showing {{count}} permits from {{date_range}}.")
+            description = description_template.format(
                 count=f"{len(data):,}",
-                date_range=query_date_range_ap
-            ) if 'description_template' in config else f"Showing {len(data):,} permits from {query_date_range_ap}."
+                date_range=query_date_range_ap,
+                date=end_date_ap
+            ) if '{count}' in description_template or '{date_range}' in description_template or '{date}' in description_template else description_template
             
             # Get the specific tooltip template for this map
             tooltip_template = config.get('tooltip_template')

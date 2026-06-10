@@ -38,8 +38,13 @@ def format_date_ap_style(dt):
     return f"{month} {day}, {year}"
 
 # API Credentials
-DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "BVIPEwcGz4XlfLDxrzzpio0Fu9OBlgTSE8pYKNWxKF8lzxz89BHMI3zT1VWQrF2Y")
-DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN", "xdboBmIBQtjISZqIRYDWjKyxY")
+from dotenv import load_dotenv
+load_dotenv()
+
+DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY")
+DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN")
+if not DATAWRAPPER_API_KEY:
+    raise RuntimeError("DATAWRAPPER_API_KEY is not set. Add it to your environment or a .env file.")
 
 # Initialize API clients
 dw = datawrapper.Datawrapper(access_token=DATAWRAPPER_API_KEY)

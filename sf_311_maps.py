@@ -86,9 +86,56 @@ def format_datetime_ap_style(dt):
     
     return f"{month} {day}, {year}, {time_str}"
 
+
+def fix_acronyms_and_case(text):
+    """
+    Apply proper case while preserving common acronyms.
+    Handles business and agency acronyms.
+    """
+    if pd.isna(text) or not isinstance(text, str):
+        return text
+    
+    # Common acronyms to preserve
+    acronyms = {
+        # Business entities
+        'llc': 'LLC', 'inc': 'Inc', 'corp': 'Corp', 'ltd': 'Ltd',
+        'lp': 'LP', 'llp': 'LLP', 'pc': 'PC', 'pllc': 'PLLC',
+        # Geographic
+        'sf': 'SF', 'ca': 'CA', 'usa': 'USA',
+        # Agencies/Departments
+        'dbi': 'DBI', 'dpw': 'DPW', 'dph': 'DPH', 'mta': 'MTA',
+        'puc': 'PUC', 'sfpd': 'SFPD', 'sffd': 'SFFD', 'cbd': 'CBD',
+        'pw': 'PW', 'att': 'ATT', 'soma': 'SoMa',
+        # Building/Permits
+        'otc': 'OTC', 'adu': 'ADU', 'rpd': 'RPD', 'usf': 'USF'
+    }
+    
+    # First apply title case
+    result = text.title()
+    
+    # Then replace any acronyms with correct casing
+    words = result.split()
+    fixed_words = []
+    for word in words:
+        # Check if the word (without punctuation) is an acronym
+        clean_word = word.strip('.,;:()[]')
+        if clean_word.lower() in acronyms:
+            # Replace with acronym, preserving any trailing punctuation
+            fixed_word = word.replace(clean_word, acronyms[clean_word.lower()])
+            fixed_words.append(fixed_word)
+        else:
+            fixed_words.append(word)
+    
+    return ' '.join(fixed_words)
+
 # API Credentials
-DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "BVIPEwcGz4XlfLDxrzzpio0Fu9OBlgTSE8pYKNWxKF8lzxz89BHMI3zT1VWQrF2Y")
-DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN", "xdboBmIBQtjISZqIRYDWjKyxY")
+from dotenv import load_dotenv
+load_dotenv()
+
+DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY")
+DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN")
+if not DATAWRAPPER_API_KEY:
+    raise RuntimeError("DATAWRAPPER_API_KEY is not set. Add it to your environment or a .env file.")
 
 # Initialize API clients
 dw = datawrapper.Datawrapper(access_token=DATAWRAPPER_API_KEY)
@@ -387,6 +434,9 @@ def get_map_data_from_datasf(chart_config):
         df['source'] = df['source'].fillna('N/A')
         df['service_name'] = df['service_name'].fillna('N/A')
         df['agency_responsible'] = df['agency_responsible'].fillna('N/A')
+        
+        # Apply proper case with acronym preservation to agency names (future-proofing)
+        df['agency_responsible'] = df['agency_responsible'].apply(fix_acronyms_and_case)
         
         # For encampment reports specifically, use a default value if service_details is empty
         encampment_mask = (df['service_name'] == 'Encampment') | (df['service_name'] == 'Encampments')

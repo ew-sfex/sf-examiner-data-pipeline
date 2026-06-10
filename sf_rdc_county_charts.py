@@ -14,7 +14,12 @@ from datawrapper import Datawrapper
 BASE_DIR = Path(__file__).resolve().parent
 PROCESSED_DIR = BASE_DIR / "data_sources" / "rdc" / "county" / "processed"
 
-DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "BVIPEwcGz4XlfLDxrzzpio0Fu9OBlgTSE8pYKNWxKF8lzxz89BHMI3zT1VWQrF2Y")
+from dotenv import load_dotenv
+load_dotenv()
+
+DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY")
+if not DATAWRAPPER_API_KEY:
+    raise RuntimeError("DATAWRAPPER_API_KEY is not set. Add it to your environment or a .env file.")
 DW = Datawrapper(access_token=DATAWRAPPER_API_KEY)
 
 LOG_FORMAT = "%(asctime)s | %(levelname)-8s | %(message)s"
@@ -55,14 +60,14 @@ CHART_CONFIGS = [
         "chart_id": "L9p0d",
         "filename": "bay_area_county_price_per_sqft.csv",
         "title": "Bay Area listing price per square foot (by county)",
-        "intro": "Monthly median listing price per square foot, January 2019 onward.",
+        "intro": "These are the monthly prices per square foot of home listings in all nine Bay Area counties dating back to the start of 2019. Prices are updated at the end of each month.",
         "y_axis_label": "Price per Sq. Ft. (USD)",
     },
     {
         "chart_id": "NNv75",
         "filename": "bay_area_county_median_price.csv",
         "title": "Bay Area median listing price (by county)",
-        "intro": "Monthly median listing price, January 2019 onward.",
+        "intro": "These are the monthly median home listing prices in all nine Bay Area counties dating back to the start of 2019. Prices are updated at the end of each month.",
         "y_axis_label": "Median listing price (USD)",
     },
 ]

@@ -57,9 +57,56 @@ def format_date_range_ap_style(start_dt, end_dt):
     else:
         return f"{ap_months[start_dt.month]} {start_dt.day} - {ap_months[end_dt.month]} {end_dt.day}, {end_dt.year}"
 
+
+def fix_acronyms_and_case(text):
+    """
+    Apply proper case while preserving common acronyms.
+    Handles business and agency acronyms.
+    """
+    if pd.isna(text) or not isinstance(text, str):
+        return text
+    
+    # Common acronyms to preserve
+    acronyms = {
+        # Business entities
+        'llc': 'LLC', 'inc': 'Inc', 'corp': 'Corp', 'ltd': 'Ltd',
+        'lp': 'LP', 'llp': 'LLP', 'pc': 'PC', 'pllc': 'PLLC',
+        # Geographic
+        'sf': 'SF', 'ca': 'CA', 'usa': 'USA',
+        # Agencies/Departments
+        'dbi': 'DBI', 'dpw': 'DPW', 'dph': 'DPH', 'mta': 'MTA',
+        'puc': 'PUC', 'sfpd': 'SFPD', 'sffd': 'SFFD', 'cbd': 'CBD',
+        'pw': 'PW', 'att': 'ATT', 'soma': 'SoMa',
+        # Building/Permits
+        'otc': 'OTC', 'adu': 'ADU', 'rpd': 'RPD', 'usf': 'USF'
+    }
+    
+    # First apply title case
+    result = text.title()
+    
+    # Then replace any acronyms with correct casing
+    words = result.split()
+    fixed_words = []
+    for word in words:
+        # Check if the word (without punctuation) is an acronym
+        clean_word = word.strip('.,;:()[]')
+        if clean_word.lower() in acronyms:
+            # Replace with acronym, preserving any trailing punctuation
+            fixed_word = word.replace(clean_word, acronyms[clean_word.lower()])
+            fixed_words.append(fixed_word)
+        else:
+            fixed_words.append(word)
+    
+    return ' '.join(fixed_words)
+
 # API Credentials
-DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY", "BVIPEwcGz4XlfLDxrzzpio0Fu9OBlgTSE8pYKNWxKF8lzxz89BHMI3zT1VWQrF2Y")
-DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN", "xdboBmIBQtjISZqIRYDWjKyxY")
+from dotenv import load_dotenv
+load_dotenv()
+
+DATAWRAPPER_API_KEY = os.environ.get("DATAWRAPPER_API_KEY")
+DATASF_APP_TOKEN = os.environ.get("DATASF_APP_TOKEN")
+if not DATAWRAPPER_API_KEY:
+    raise RuntimeError("DATAWRAPPER_API_KEY is not set. Add it to your environment or a .env file.")
 
 # Initialize API clients
 dw = datawrapper.Datawrapper(access_token=DATAWRAPPER_API_KEY)
@@ -73,14 +120,14 @@ MAP_CONFIGS = {
         "business_filter": "location_start_date IS NOT NULL AND (city = 'San Francisco' OR city = 'San Fran' OR city = 'SF' OR city = 'San Francisceo' OR city = 'San Franciscce' OR city = 'San Francicsco' OR city = 'Santo Francisco')",
         "date_field": "location_start_date", 
         "title": "Recent business activity",
-        "description": "New business openings and business relocations",
+        "description_template": "These are the {count} total business relocations and openings, recorded by the San Francisco Treasurer and Tax Collector's Office, over the most recent seven-day period for which data is available. Figures are updated daily.",
         "marker_color": "#80d0d8",  # SF Examiner blue
         "tooltip_template": """<div style="font-family:Arial,sans-serif;line-height:1.3;">
 <b>{{ activity_type }}</b><br>
-<b>Business:</b> {{ PROPER(dba_name) }}<br>
+<b>Business:</b> {{ dba_name }}<br>
 <b>Address:</b> {{ PROPER(address) }}<br>
-<b>Type:</b> {{ PROPER(business_type) }}<br>
-<b>Started:</b> {{ opened_datetime }}<br>
+<b>Type:</b> {{ business_type }}<br>
+<b>Started:</b> {{ start_date }}<br>
 <b>Neighborhood:</b> {{ PROPER(neighborhood) }}
 </div>"""
     }
@@ -233,7 +280,8 @@ def get_map_data_from_datasf(chart_config):
             df['dba_start_date'] = pd.to_datetime(df['dba_start_date'])
         
         # Create formatted datetime field
-        df['opened_datetime'] = df[date_field].dt.strftime('%B %d, %Y')
+        # Use AP Style date format (no time for business openings)
+        df['opened_datetime'] = df[date_field].apply(format_date_ap_style)
         
         # Determine business activity type (new vs relocated)
         def determine_activity_type(row):
@@ -268,6 +316,10 @@ def get_map_data_from_datasf(chart_config):
         df['naic_code_description'] = df['naic_code_description'].fillna('Unknown')
         df['dba_name'] = df['dba_name'].fillna('Unknown Business')
         df['full_business_address'] = df['full_business_address'].fillna('Address Unknown')
+        
+        # Apply proper case with acronym preservation to business names and types
+        df['dba_name'] = df['dba_name'].apply(fix_acronyms_and_case)
+        df['naic_code_description'] = df['naic_code_description'].apply(fix_acronyms_and_case)
         
         # Format neighborhood with title case
         df['neighborhoods_analysis_boundaries'] = df['neighborhoods_analysis_boundaries'].apply(
@@ -314,7 +366,7 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
             'longitude': pd.to_numeric(data['long'], errors='coerce'),
             'dba_name': data['dba_name'],
             'address': data['address'],
-            'opened_datetime': data['opened_datetime'],
+            'start_date': data['opened_datetime'],  # Renamed to prevent date auto-detection
             'neighborhood': data['neighborhood'],
             'district': data['district'],
             'business_type': data['business_type'],
@@ -336,11 +388,12 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
         query_date_range_ap = format_date_range_ap_style(start_date, latest_date)
         current_date_ap = format_date_ap_style(datetime.now())
         
-        # Build description
-        description = config.get('description_template', f"Showing {{count}} new businesses from {{date_range}}.").format(
+        # Build description with count placeholder
+        description_template = config.get('description_template', f"Showing {{count}} new businesses from {{date_range}}.")
+        description = description_template.format(
             count=f"{len(dw_data):,}",
             date_range=query_date_range_ap
-        ) if 'description_template' in config else f"Showing {len(dw_data):,} new businesses from {query_date_range_ap}."
+        ) if '{count}' in description_template or '{date_range}' in description_template else description_template
         
         # Start with essential metadata we always want to update
         # NOTE: Title is NOT set here - manage titles directly in Datawrapper
@@ -417,6 +470,21 @@ def update_datawrapper_map(chart_id, data, config, latest_date):
                 "longitude": "longitude",
                 "color": "activity_type"
             }
+        
+        # Apply custom tooltip template from config (overrides preserved settings)
+        tooltip_template = config.get('tooltip_template')
+        if tooltip_template:
+            if "visualize" not in metadata:
+                metadata["visualize"] = {}
+            metadata["visualize"]["tooltip"] = {
+                "title": "",  # Clear the title field
+                "body": tooltip_template,
+                "html": True,
+                "style": "custom",
+                "sticky": True,
+                "enabled": True
+            }
+            logger.info(f"Applied custom tooltip template to {chart_id}")
         
         # Update the chart metadata (title is NOT set - manage in Datawrapper)
         dw.update_chart(chart_id, metadata=metadata)
