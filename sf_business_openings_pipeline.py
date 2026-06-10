@@ -52,7 +52,7 @@ CHART_CONFIGS = {
         "chart_id": "jy28w",  # Business Openings chart
         "query": "SELECT date_extract_m(dba_start_date) AS month, date_extract_y(dba_start_date) AS year, COUNT(*) AS count WHERE dba_start_date IS NOT NULL AND (city = 'San Francisco' OR city = 'San Fran' OR city = 'SF' OR city = 'San Francisceo' OR city = 'San Franciscce' OR city = 'San Francicsco' OR city = 'Santo Francisco') AND dba_start_date >= '{}' AND dba_start_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Business openings",
-        "description": "Monthly new business openings in San Francisco",
+        "description_template": "These are the total business openings, recorded by the San Francisco Treasurer and Tax Collector's Office, for each month dating back to the start of 2020. Figures are updated at the end of each month.",
         "color": "#80d0d8"  # SF Examiner blue
     }
 }
@@ -176,6 +176,7 @@ def update_datawrapper_chart(chart_id, data, config):
                 "interpolation": "linear",
                 "symbols": {
                     "enabled": True if i == 0 else False,
+                    "on": "last",
                     "type": "circle",
                     "fill": colors[year],
                     "stroke": colors[year],
@@ -183,12 +184,15 @@ def update_datawrapper_chart(chart_id, data, config):
                 }
             }
         
+        # Use description_template if available, otherwise fall back to static description
+        description = config.get('description_template', config.get('description', ''))
+        
         current_date_ap = format_date_ap_style(datetime.now())
         metadata = {
             "describe": {
                 "source-name": "DataSF - Registered Business Locations",
                 "source-url": "https://data.sfgov.org/Economy-and-Community/Registered-Business-Locations-San-Francisco/g8m3-pdis",
-                "intro": "",
+                "intro": description,
                 "byline": "San Francisco Examiner"
                 # NOTE: Title is NOT set here - manage titles directly in Datawrapper
             },

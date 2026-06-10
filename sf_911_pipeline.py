@@ -52,7 +52,7 @@ CHART_CONFIGS = {
         "chart_id": "1DNOm",  # Violent crimes trend chart
         "query": "SELECT date_extract_m(incident_date) AS month, date_extract_y(incident_date) AS year, COUNT(*) AS count WHERE incident_category IN ('Homicide', 'Robbery', 'Assault', 'Sex Offense') AND incident_date >= '{}' AND incident_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Violent crime incidents",
-        "description": "Comparing monthly patterns across years",
+        "description_template": "These are the monthly totals for violent crimes reported to the San Francisco Police Department dating back to the start of 2021. Figures are updated at the end of each month.",
         "color": "#cf4236"  # SF Examiner red
     },
     "property_crimes_monthly_comparison": {
@@ -60,7 +60,7 @@ CHART_CONFIGS = {
         "chart_id": "MRgFo",  # Property crimes trend chart
         "query": "SELECT date_extract_m(incident_date) AS month, date_extract_y(incident_date) AS year, COUNT(*) AS count WHERE incident_category IN ('Burglary', 'Larceny Theft', 'Motor Vehicle Theft', 'Arson') AND incident_date >= '{}' AND incident_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Property crime incidents",
-        "description": "Comparing monthly patterns across years",
+        "description_template": "These are the monthly totals for property crimes reported to the San Francisco Police Department dating back to the start of 2021. Figures are updated at the end of each month.",
         "color": "#ffd74c"  # SF Examiner yellow
     },
     "drug_offenses_monthly_comparison": {
@@ -68,7 +68,7 @@ CHART_CONFIGS = {
         "chart_id": "ZquUz",  # Drug offenses trend chart
         "query": "SELECT date_extract_m(incident_date) AS month, date_extract_y(incident_date) AS year, COUNT(*) AS count WHERE incident_category = 'Drug Offense' AND incident_date >= '{}' AND incident_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Drug offense incidents",
-        "description": "Comparing monthly patterns across years",
+        "description_template": "These are the monthly totals for drug offenses reported to the San Francisco Police Department dating back to the start of 2021. Figures are updated at the end of each month.",
         "color": "#7e883f"  # SF Examiner green
     },
     "vehicle_related_monthly_comparison": {
@@ -76,7 +76,7 @@ CHART_CONFIGS = {
         "chart_id": "Z9xal",  # Vehicle-related incidents trend chart
         "query": "SELECT date_extract_m(incident_date) AS month, date_extract_y(incident_date) AS year, COUNT(*) AS count WHERE incident_category IN ('Traffic Collision', 'Traffic Violation', 'Motor Vehicle Theft') AND incident_date >= '{}' AND incident_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Vehicle-related incidents",
-        "description": "Comparing monthly patterns across years",
+        "description_template": "These are the monthly totals for vehicle-related incidents reported to and recorded by the San Francisco Police Department dating back to the start of 2021. Figures are updated at the end of each month.",
         "color": "#80d0d8"  # SF Examiner blue
     },
     "firearms_monthly_comparison": {
@@ -84,7 +84,7 @@ CHART_CONFIGS = {
         "chart_id": "DgPPX",  # Firearm-related incidents trend chart
         "query": "SELECT date_extract_m(incident_date) AS month, date_extract_y(incident_date) AS year, COUNT(*) AS count WHERE (incident_category IN ('Weapons Carrying Etc', 'Weapons Offense') OR incident_subcategory IN ('Robbery - Armed with Gun', 'Assault - Gun', 'Assault with a Gun', 'Discharge of a Firearm', 'Illegal Discharge of a Firearm')) AND incident_date >= '{}' AND incident_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Firearm-related incidents",
-        "description": "Comparing monthly patterns across years",
+        "description_template": "These are the monthly totals for firearm-related incidents reported to and the San Francisco Police Department dating back to the start of 2021. Figures are updated at the end of each month.",
         "color": "#e3cbac"  # SF Examiner tan
     }
 }
@@ -204,6 +204,7 @@ def update_datawrapper_chart(chart_id, data, config):
                 "interpolation": "linear",
                 "symbols": {
                     "enabled": True if i == 0 else False,
+                    "on": "last",
                     "type": "circle",
                     "fill": colors[year],
                     "stroke": colors[year],
@@ -211,12 +212,15 @@ def update_datawrapper_chart(chart_id, data, config):
                 }
             }
         
+        # Use description_template if available, otherwise fall back to static description
+        description = config.get('description_template', config.get('description', ''))
+        
         current_date_ap = format_date_ap_style(datetime.now())
         metadata = {
             "describe": {
                 "source-name": "DataSF - Police Department Incident Reports",
                 "source-url": "https://data.sfgov.org/Public-Safety/Police-Department-Incident-Reports-2018-to-Present/wg3w-h783",
-                "intro": "",
+                "intro": description,
                 "byline": "San Francisco Examiner"
                 # NOTE: Title is NOT set here - manage titles directly in Datawrapper
             },

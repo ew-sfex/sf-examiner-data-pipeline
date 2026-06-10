@@ -42,7 +42,7 @@ CHART_CONFIGS: Dict[str, Dict[str, str]] = {
     "median_listing_price_per_square_foot": {
         "chart_id": "ri9VR",
         "title": "San Francisco median listing price per square foot",
-        "subtitle": "Monthly listing price per square foot",
+        "subtitle": "This the median price per square foot of listed San Francisco homes dating back to the start of 2020. Prices are updated at the end of each month.",
         "metric_column": "value",
         "value_label": "median_listing_price_per_sqft",
         "y_axis_label": "Price per Sq. Ft. (USD)",
@@ -50,7 +50,7 @@ CHART_CONFIGS: Dict[str, Dict[str, str]] = {
     "active_listing_count": {
         "chart_id": "fnk2G",
         "title": "San Francisco active for-sale listings",
-        "subtitle": "Monthly active listings",
+        "subtitle": "These are how many San Francisco homes have been listed each month dating back to the start of 2020. Totals are updated at the end of each month.",
         "metric_column": "value",
         "value_label": "active_listing_count",
         "y_axis_label": "Active listings",
@@ -58,7 +58,7 @@ CHART_CONFIGS: Dict[str, Dict[str, str]] = {
     "median_listing_price": {
         "chart_id": "xBni4",
         "title": "San Francisco median listing price",
-        "subtitle": "Monthly median listing price",
+        "subtitle": "These are the median listing prices for San Francisco homes for each month dating back to the start of 2020. Median prices are updated at the end of each month.",
         "metric_column": "value",
         "value_label": "median_listing_price",
         "y_axis_label": "Median listing price (USD)",
@@ -66,7 +66,7 @@ CHART_CONFIGS: Dict[str, Dict[str, str]] = {
     "median_days_on_market": {
         "chart_id": "wcABj",
         "title": "San Francisco median days on market",
-        "subtitle": "Monthly median days homes spend on market",
+        "subtitle": "This is how long the median listed San Francisco home had been on the market for each month dating back to the start of 2020. Median days on the market are updated at the end of each month.",
         "metric_column": "value",
         "value_label": "median_days_on_market",
         "y_axis_label": "Median days on market",
@@ -118,6 +118,7 @@ def build_line_settings(years):
             "interpolation": "linear",
             "symbols": {
                 "enabled": i == 0,
+                "on": "last",
                 "type": "circle",
                 "fill": color,
                 "stroke": color,

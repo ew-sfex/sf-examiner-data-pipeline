@@ -52,7 +52,7 @@ CHART_CONFIGS = {
         "chart_id": "qKV9i",  # Building Permits Issued chart
         "query": "SELECT date_extract_m(issued_date) AS month, date_extract_y(issued_date) AS year, COUNT(*) AS count WHERE issued_date IS NOT NULL AND issued_date >= '{}' AND issued_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Building permits issued",
-        "description": "Monthly building permits issued by San Francisco",
+        "description_template": "These are the monthly total building permits issued by the Department of Building Inspection dating back to 2020. Figures are updated at the end of each month. The permit types include new construction; new wood-frame construction; additions, alterations or repairs; erecting signage; quarrying, grading, filling or excavating; demolitions; walls or painted signs; and over-the-counter alterations permits.",
         "color": "#cf4236"  # SF Examiner red
     },
     "permits_completed_monthly_comparison": {
@@ -60,7 +60,7 @@ CHART_CONFIGS = {
         "chart_id": "B6RMy",  # Building Permits Completed chart
         "query": "SELECT date_extract_m(completed_date) AS month, date_extract_y(completed_date) AS year, COUNT(*) AS count WHERE completed_date IS NOT NULL AND completed_date >= '{}' AND completed_date <= '{}' GROUP BY year, month ORDER BY year ASC, month ASC",
         "title": "Building permits completed",
-        "description": "Monthly building permits completed in San Francisco",
+        "description_template": "These are the monthly total building permits the Department of Building Inspection marked as completed dating back to 2020. Figures are updated at the end of each month. The permit types include new construction; new wood-frame construction; additions, alterations or repairs; erecting signage; quarrying, grading, filling or excavating; demolitions; walls or painted signs; and over-the-counter alterations permits.",
         "color": "#7e883f"  # SF Examiner green
     }
 }
@@ -177,6 +177,7 @@ def update_datawrapper_chart(chart_id, data, config):
                 "interpolation": "linear",
                 "symbols": {
                     "enabled": True if i == 0 else False,
+                    "on": "last",
                     "type": "circle",
                     "fill": colors[year],
                     "stroke": colors[year],
@@ -184,12 +185,15 @@ def update_datawrapper_chart(chart_id, data, config):
                 }
             }
         
+        # Use description_template if available, otherwise fall back to static description
+        description = config.get('description_template', config.get('description', ''))
+        
         current_date_ap = format_date_ap_style(datetime.now())
         metadata = {
             "describe": {
                 "source-name": "DataSF - Building Permits",
                 "source-url": "https://data.sfgov.org/Housing-and-Buildings/Building-Permits/i98e-djp9",
-                "intro": "",
+                "intro": description,
                 "byline": "San Francisco Examiner"
                 # NOTE: Title is NOT set here - manage titles directly in Datawrapper
             },

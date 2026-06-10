@@ -192,6 +192,7 @@ def update_datawrapper_chart(chart_id, data, config):
                 "interpolation": "linear",
                 "symbols": {
                     "enabled": True if i == 0 else False,
+                    "on": "last",
                     "type": "circle",
                     "fill": sf_colors[min(i, len(sf_colors) - 1)],
                     "stroke": sf_colors[min(i, len(sf_colors) - 1)],
